@@ -1,0 +1,30 @@
+#$Id: Build.PL 17619 2012-08-29 13:41:02Z jensenma $
+use Module::Build;
+use strict;
+use warnings;
+
+my $build =  Module::Build->new
+    ( dist_name     => 'REST-Neo4p',
+      dist_abstract => 'Perl bindings for a Neo4j graph database',
+      dist_version_from => 'lib/REST/Neo4p.pm',
+      dist_author => 'Mark A. Jensen',
+      license => 'perl',
+      requires => {
+	'JSON' => 2.0,
+	'URI::Escape' => 3.3,
+	'LWP' => 0,
+	'Exception::Class' => 1.3
+       },
+      configure_requires => {
+	'Module::Build' => 0
+       },
+      build_requires => {
+	'Module::Build' => 0,
+	'Test::More' => 0,
+	'Test::Exception' => 0
+       }
+      
+    );
+
+$build->notes( test_server => $build->prompt("Server for live tests:", "http://127.0.0.1:7474"));
+$build->create_build_script;

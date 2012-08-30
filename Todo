@@ -1,0 +1,8 @@
+TODO list for Perl module REST::Neo4p
+
+- Create convenience index objects for auto indexes
+- Provide support for the Cypher query service (in REST::Neo4p::Query)
+- create appropriate error tests (099_error.t)
+- parse service errors and pass up to user with better context
+
+
