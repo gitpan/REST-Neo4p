@@ -1,6 +1,7 @@
 #-*-perl-*-
 #$Id: 005_db.t 17619 2012-08-29 13:41:02Z jensenma $
 use Test::More tests => 15;
+use Test::Exception;
 use Module::Build;
 use lib '../lib';
 use strict;
@@ -36,7 +37,7 @@ SKIP : {
   ok my @rtypes = REST::Neo4p->get_relationship_types, 'get relationship type list';
   ok grep(/bubba/,@rtypes), 'found relationship type in type list';
   ok $r->remove, 'remove relationship';
-  ok !REST::Neo4p->get_relationship_by_id($$r12), 'relationship is gone';
+  throws_ok {REST::Neo4p->get_relationship_by_id($$r12)} 'REST::Neo4p::Exception', 'relationship is gone';
 
   TODO : {
       local $TODO = "db index functions";

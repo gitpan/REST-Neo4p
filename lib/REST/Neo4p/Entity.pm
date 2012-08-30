@@ -1,4 +1,4 @@
-#$Id: Entity.pm 17638 2012-08-30 03:52:17Z jensenma $
+#$Id: Entity.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -27,16 +27,11 @@ sub new {
   my ($properties) = (@_);
   my $url_components = delete $properties->{_addl_components};
   my $agent = $REST::Neo4p::AGENT;
-  unless ($agent) {
-    croak "Not connected";
-  }
+  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+
   my $decoded_resp = $agent->post_data([$entity_type,
 					$url_components ? @$url_components : ()],
 				       $properties);
-  unless ($decoded_resp) {
-    carp $agent->errmsg;
-    return;
-  }
   $decoded_resp->{self} ||= $agent->location;
   return $class->new_from_json_response($decoded_resp);
 }
@@ -113,6 +108,7 @@ sub get_property {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
+  REST::Neo4p::CommException->throw('Not connected') unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   my @ret;
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
@@ -129,6 +125,7 @@ sub get_properties {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
+  REST::Neo4p::CommException->throw('Not connected') unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
   my $decoded_resp = $agent->get_data($entity_type,$$self,$suffix);
@@ -142,6 +139,7 @@ sub remove_property {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
+  REST::Neo4p::CommException->throw('Not connected') unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   foreach (@props) {
     $agent->delete_data($entity_type,$$self,$suffix,$_);
@@ -158,10 +156,8 @@ sub entity_type { shift->_entry->{entity_type} }
 # $relationship_obj = REST::Neo4p::Relationship->_entity_by_id($id)
 sub _entity_by_id {
   my $class = shift;
-  if (ref $class) {
-    carp "_entity_by_id is a class method only";
-    return;
-  }
+  REST::Neo4p::ClassOnlyException->throw() if (ref $class);
+  
   my $entity_type = $class;
   my $id;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
@@ -171,8 +167,14 @@ sub _entity_by_id {
   else {
     ($id) = @_;
   }
-  return $ENTITY_TABLE->{$entity_type}{$id} && 
-    $ENTITY_TABLE->{$entity_type}{$id}{self};
+  unless ($ENTITY_TABLE->{$entity_type}{$id}) {
+    # not recorded as object yet
+    my $agent = $REST::Neo4p::AGENT;
+    REST::Neo4p::CommException->throw('Not connected') unless $agent;
+    my $decoded_resp = $agent->get_data($id);
+    $class->new_from_json_response($decoded_resp);
+  }
+  return $ENTITY_TABLE->{$entity_type}{$id}{self};
 }
 
 sub _get_url_suffix {
@@ -240,6 +242,10 @@ L<REST::Neo4p::Index>.
     majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

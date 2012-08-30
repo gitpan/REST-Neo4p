@@ -1,4 +1,4 @@
-#$Id: Relationship.pm 17638 2012-08-30 03:52:17Z jensenma $
+#$Id: Relationship.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Relationship;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Exceptions;
@@ -67,6 +67,10 @@ L<REST::Neo4p>, L<REST::Neo4p::Node>, L<REST::Neo4p::Index>.
     majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

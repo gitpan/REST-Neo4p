@@ -214,6 +214,10 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Node>.
 
 =head1 LICENSE
 
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
+
 =cut
 
 1;

@@ -2,5 +2,9 @@ Revision history for Perl module TCGA::Neo4j
 
 0.01 Tue Aug 21 14:10:01 2012
     - original version; created by ExtUtils::ModuleMaker 0.51
-
+0.01.1
+    - added REST::Neo4p::Path to support paths returned by queries
+    - added a few more exception throws
+    - built out pod
+    - added pod tests
 

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 006_query.t 17639 2012-08-30 04:20:00Z jensenma $
+#$Id: 006_query.t 17640 2012-08-30 13:46:38Z jensenma $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -68,13 +68,14 @@ SKIP : {
     is $row->[1], 'Wilma', "Wilma is Betty's pal";
   }
 
-  TODO : {
-    local $TODO = 'Handle returned paths';
-    ok $q = REST::Neo4p::Query->new("START n=node($$n5), m=node($$n3) MATCH path = (n)-[:child_of]->()-[:pal_of]->()-[:parent_of]->(m)  RETURN path");
-    is $q->execute, 1, 'execute and return 1 path';
-#     while (my $row = $q->fetch) {
-#       is ref $row->[0], 'ARRAY', 'got a path';
-#     }
+  ok $q = REST::Neo4p::Query->new("START n=node($$n5), m=node($$n3) MATCH path = (n)-[:child_of]->()-[:pal_of]->()-[:parent_of]->(m)  RETURN path");
+  is $q->execute, 1, 'execute and return 1 path';
+  
+  while (my $row = $q->fetch) {
+      my $path = $row->[0];
+      isa_ok $path, 'REST::Neo4p::Path';
+      is scalar $path->nodes, 4, 'got all nodes';
+      is scalar $path->relationships, 3, 'got all relationships';
   }
 
   CLEANUP : {

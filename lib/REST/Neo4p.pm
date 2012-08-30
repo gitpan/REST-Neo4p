@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 17638 2012-08-30 03:52:17Z jensenma $
+#$Id: Neo4p.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.1';
+  $VERSION = '0.01.1';
 }
 our $AGENT;
 
@@ -30,20 +30,20 @@ sub connect {
 sub get_node_by_id {
   my $class = shift;
   my ($id) = @_;
-  return REST::Neo4p::Entity->_entity_by_id('node',$id);
+  return REST::Neo4p::Node->_entity_by_id($id);
 }
 
 # $reln = REST::Neo4p->get_relationship_by_id($id);
 sub get_relationship_by_id {
   my $class = shift;
   my ($id) = @_;
-  return REST::Neo4p::Entity->_entity_by_id('relationship',$id);
+  return REST::Neo4p::Relationship->_entity_by_id($id);
 }
 
 sub get_index_by_name {
   my $class = shift;
   my ($name) = @_;
-  return REST::Neo4p::Entity->_entity_by_id('index',$name);
+  return REST::Neo4p::Index->_entity_by_id($name);
 }
 
 # @all_reln_types = REST::Neo4p->get_relationship_types
@@ -154,6 +154,10 @@ The class L<REST::Neo4p::Query> provides a DBIesqe Cypher query facility.
     majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

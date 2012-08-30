@@ -38,7 +38,7 @@
    "provides" : {
       "REST::Neo4p" : {
          "file" : "lib/REST/Neo4p.pm",
-         "version" : "0.1"
+         "version" : "v0.1.1"
       },
       "REST::Neo4p::Agent" : {
          "file" : "lib/REST/Neo4p/Agent.pm",
@@ -60,6 +60,10 @@
          "file" : "lib/REST/Neo4p/Node.pm",
          "version" : "0.1"
       },
+      "REST::Neo4p::Path" : {
+         "file" : "lib/REST/Neo4p/Path.pm",
+         "version" : "0.1"
+      },
       "REST::Neo4p::Query" : {
          "file" : "lib/REST/Neo4p/Query.pm",
          "version" : "0.1"
@@ -75,5 +79,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.1"
+   "version" : "v0.1.1"
 }

@@ -1,4 +1,4 @@
-#$Id: Node.pm 17638 2012-08-30 03:52:17Z jensenma $
+#$Id: Node.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -109,19 +109,53 @@ Instantiates a new Node object and creates corresponding node in the database.
 
 =item remove()
 
+ $node->remove()
+
+Removes a node from the database and destroys the object.
+
 =item get_property()
+
+ $name = $node->get_property('name');
+ @vitals = $node->get_property( qw( height weight bp temp ) );
+
+Get the values of properties on nodes and relationships.
 
 =item set_property()
 
+ $name = $node->set_property( name => "Sun Tzu" );
+ $node1->relate_to($node2,"is_pal_of")->set_property( duration => 'old pal' );
+
+Sets values of properties on nodes and relationships.
+
 =item get_properties()
+
+ $props = $relationship->get_properties;
+
+Get all the properties of a node or relationship as a hashref.
 
 =item relate_to()
 
+ $relationship = $node1->relate_to($node2, 'manager');
+
+Set a relationship between two nodes and returns the
+L<REST::Neo4p::Relationship|REST::Neo4p::Relationship> thus
+created. Call on the "from" node, first argument is the "to" node,
+second argument is the relationship type.
+
 =item get_relationships()
+
+ @all_relationships = $node1->get_relationships()
+
+Get all incoming and outgoing relationships of a node. Returns array
+of L<REST::Neo4p::Relationship|REST::Neo4p::Relationship> objects;
 
 =item get_incoming_relationships()
 
+ @incoming_relationships = $node1->get_incoming_relationships();
+
 =item get_outgoing_relationships()
+
+ @outgoing_relationships = $node1->get_outgoing_relationships();
 
 =back
 
@@ -138,6 +172,10 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Index>.
     http://tcga-data.nci.nih.gov
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

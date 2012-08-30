@@ -1,5 +1,6 @@
-#$Id: Query.pm 17639 2012-08-30 04:20:00Z jensenma $
+#$Id: Query.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Query;
+use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use strict;
@@ -217,6 +218,10 @@ L<REST::Neo4p>, L<REST::Neo4p::Agent>.
    majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 1;

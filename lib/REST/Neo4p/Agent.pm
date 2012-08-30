@@ -1,4 +1,4 @@
-#$Id: Agent.pm 17638 2012-08-30 03:52:17Z jensenma $
+#$Id: Agent.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -95,7 +95,9 @@ sub AUTOLOAD {
 	%rest_params = %{ pop @url_components };
       }
       my $resp = $self->$rq(join('/',$self->{_actions}{$action}, @url_components),%rest_params);
-      $self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
+      eval { 
+	$self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
+      };
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {
 	  REST::Neo4p::Neo4jException->throw( 
@@ -316,6 +318,10 @@ bareword was returned by the server.
     majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 
