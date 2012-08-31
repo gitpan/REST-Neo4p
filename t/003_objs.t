@@ -36,6 +36,7 @@ SKIP : {
 
     ok my $node2 = REST::Neo4p::Node->new({ a => 1 }), 'create node with props';
     is $node2->get_property('a'), 1, 'property created';
+    1;
     ok $node2->set_property( { foo => 'bar', goob => 12 } ), 'set props';
     is_deeply [$node2->get_property('foo','goob')], ['bar',12], 'get props singly';
     is_deeply $node2->get_properties, { a => 1, foo => 'bar', goob => 12 }, 'get all props at once';
@@ -56,11 +57,13 @@ SKIP : {
     is ${$relns[0]}, $$rel21, 'got incoming reln';
     ok @relns = $node1->get_relationships('out'), 'get outgoing relationships';
     is ${$relns[0]}, $$rel12, 'got outgoing reln';
-    
-    ok $rel12->remove, 'remove relationship n1 to n2';
-    ok $rel21->remove, 'remove relationship n2 to n1';
-    ok $node1->remove, 'remove n1';
-    ok $node2->remove, 'remove n2';
+
+    CLEANUP : {    
+	ok $rel12->remove, 'remove relationship n1 to n2';
+	ok $rel21->remove, 'remove relationship n2 to n1';
+	ok $node1->remove, 'remove n1';
+	ok $node2->remove, 'remove n2';
+    }
 
 
 }

@@ -25,3 +25,20 @@ throws_ok { REST::Neo4p::Entity->new() } 'REST::Neo4p::NotSuppException', 'attem
 throws_ok { REST::Neo4p->connect('http://127.0.0.1:9999') } 'REST::Neo4p::CommException', 'bad address ok';
 
 throws_ok { REST::Neo4p::Query->new('fake query')->do() } 'REST::Neo4p::ClassOnlyException', 'Query do class only ok';
+
+my $not_connected;
+eval {
+  REST::Neo4p->connect($TEST_SERVER);
+};
+if ( my $e = REST::Neo4p::CommException->caught() ) {
+  $not_connected = 1;
+  diag "Test server unavailable : ".$e->message;
+}
+
+SKIP : {
+    skip 'no connection to neo4j',$num_live_tests if $not_connected;
+    my $n1 = REST::Neo4p::Node->new();
+    throws_ok { $n1->set_property('boog') } 'REST::Neo4p::LocalException', 'bad set_property arg ok';
+
+    ok $n1->remove, 'remove node';
+}

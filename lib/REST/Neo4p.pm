@@ -12,9 +12,12 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $VERSION = '0.01.1';
+  $REST::Neo4p::VERSION = '0.01.2';
 }
+
+our $CREATE_AUTO_ACCESSORS = 0;
 our $AGENT;
+
 
 # connect($host_and_port)
 sub connect {
@@ -113,6 +116,31 @@ Actions on class instances have a corresponding effect on the database
 (i.e., C<REST::Neo4p> approximates an ORM).
 
 The class L<REST::Neo4p::Query> provides a DBIesqe Cypher query facility.
+
+=head2 Property Auto-accessors
+
+Depending on the application, it may be natural to think of properties
+as fields of your nodes and relationships. To create accessors named
+for the entity properties, set
+
+ $REST::Neo4p::CREATE_AUTO_ACCESSORS = 1;
+
+Then, when L</set_property()> is used to first create and set a
+property, accessors will be created on the class:
+
+ $node1->set_property({ flavor => 'strange', spin => -0.5 });
+ printf "Quark has flavor %s\n", $node1->flavor;
+ $node1->set_spin(0.5);
+
+If your point of reference is the database, rather than the objects,
+auto-accessors may be confusing, since once the accessor is created
+for the class, it will exist for all future instances:
+
+ print "Yes I can!\n" if REST::Neo4p::Node->new()->can('flavor');
+
+but there is no fundamental reason why new nodes or relationships must
+have the property (it is NoSQL, after all). Therefore this is a choice
+for you to make; the default is I<no> auto-accessors.
 
 =head1 CLASS METHODS
 

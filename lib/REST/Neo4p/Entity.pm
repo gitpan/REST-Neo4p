@@ -88,6 +88,7 @@ sub remove {
 sub set_property {
   my $self = shift;
   my ($props) = @_;
+  REST::Neo4p::LocalException->throw('Arg must be a hashref') unless ref($props) && ref $props eq 'HASH';
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
@@ -97,6 +98,10 @@ sub set_property {
   for (keys %$props) {
     $agent->put_data([$entity_type,$$self,$suffix,
 		      $_], $props->{$_});
+  }
+  # create accessors
+  if ($REST::Neo4p::CREATE_AUTO_ACCESSORS) {
+    for (keys %$props) { $self->_create_accessors($_) unless $self->can($_) }
   }
   return 1;
 }
@@ -113,7 +118,17 @@ sub get_property {
   my @ret;
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
   for (@props) {
-    my $decoded_resp = $agent->get_data($entity_type,$$self,$suffix,$_);
+    my $decoded_resp;
+    eval {
+      $decoded_resp = $agent->get_data($entity_type,$$self,$suffix,$_);
+    };
+    my $e;
+    if ( $e = Exception::Class->caught('REST::Neo4p::CommError')) {
+      $e->rethrow;
+    }
+    elsif ( $e = Exception::Class->caught() ) {
+      ref $e ? $e->rethrow : die $e;
+    }
     push @ret, $decoded_resp;
   }
   return @ret == 1 ? $ret[0] : @ret;
@@ -209,6 +224,20 @@ sub DESTROY {
   }
   delete $ENTITY_TABLE->{$entity_type}{$$self};
   return;
+}
+
+sub _create_accessors {
+  my $self = shift;
+  my $class = ref $self;
+  my ($prop_name) = @_;
+  no strict qw(refs);
+  *{$class."::$prop_name"} = sub {
+    my $caller = shift;
+    $caller->get_property( $prop_name );
+  };
+  *{$class."::set_$prop_name"} = sub { 
+    shift->set_property( {$prop_name => $_[0]} );
+  };
 }
 
 =head1 NAME

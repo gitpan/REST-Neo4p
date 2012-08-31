@@ -20,6 +20,7 @@ t/003_objs.t
 t/004_idx.t
 t/005_db.t
 t/006_query.t
+t/007_accessors.t
 t/098_pod.t
 t/099_error.t
 META.yml

@@ -130,6 +130,7 @@ Sets values of properties on nodes and relationships.
 =item get_properties()
 
  $props = $relationship->get_properties;
+ print "'Sup, Al." if ($props->{name} eq 'Al');
 
 Get all the properties of a node or relationship as a hashref.
 
@@ -156,6 +157,10 @@ of L<REST::Neo4p::Relationship|REST::Neo4p::Relationship> objects;
 =item get_outgoing_relationships()
 
  @outgoing_relationships = $node1->get_outgoing_relationships();
+
+=item property auto-accessors
+
+See L<REST::Neo4p/Property Auto-accessors>.
 
 =back
 

@@ -46,13 +46,43 @@ C<REST::Neo4p::Relationship> objects represent Neo4j relationships.
 
 =item new()
 
+ $r1 = REST::Neo4p::Relationship->new($node1, $node2, 'ingratiates');
+
+Creates the relationship given by the scalar third argument between
+the first argument and second argument, both C<REST::Neo4p::Node>
+objects.
+
 =item get_property()
+
+ $name = $node->get_property('name');
+ @vitals = $node->get_property( qw( height weight bp temp ) );
+
+Get the values of properties on nodes and relationships.
 
 =item set_property()
 
+ $name = $node->set_property( name => "Sun Tzu" );
+ $node1->relate_to($node2,"is_pal_of")->set_property( duration => 'old pal' );
+
+Sets values of properties on nodes and relationships.
+
 =item get_properties()
 
+ $props = $relationship->get_properties;
+ print "'Sup, Al." if ($props->{name} eq 'Al');
+
+Get all the properties of a node or relationship as a hashref.
+
 =item type()
+
+ $rel = $node->relate_to($node2, 'my_type');
+ print "This is my_type of relationship" if $rel->type eq 'my_type';
+
+Gets a relationship's type.
+
+=item property auto-accessors
+
+See L<REST::Neo4p/Property Auto-accessors>.
 
 =back
 
