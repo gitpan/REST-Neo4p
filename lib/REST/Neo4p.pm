@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 17640 2012-08-30 13:46:38Z jensenma $
+#$Id: Neo4p.pm 17650 2012-08-31 03:41:43Z jensenma $
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.12';
+  $REST::Neo4p::VERSION = '0.121';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -45,8 +45,8 @@ sub get_relationship_by_id {
 
 sub get_index_by_name {
   my $class = shift;
-  my ($name) = @_;
-  return REST::Neo4p::Index->_entity_by_id($name);
+  my ($name, $type) = @_;
+  return REST::Neo4p::Index->_entity_by_id($name,$type);
 }
 
 # @all_reln_types = REST::Neo4p->get_relationship_types
@@ -81,6 +81,21 @@ REST::Neo4p - Perl object bindings for a Neo4j database
 
   use REST::Neo4p;
   REST::Neo4p->connect('http://127.0.0.1:7474');
+  $i = REST::Neo4p::Index->new('node', 'my_node_index');
+  $i->add_entry(REST::Neo4p::Node->new({ name => 'Fred Rogers' }),
+                                       guy  => 'Fred_Rogers');
+  $index = REST::Neo4p->get_index_by_name('my_node_index','node');
+ ($my_node) = $index->find_entries('guy' => 'Fred_Rogers');
+  $new_neighbor = REST::Neo4p::Node->new({'name' => 'Donkey Hoty'});
+  $my_reln = $my_node->relate_to($new_neighbor, 'neighbor');
+
+  $query = REST::Neo4p::Query->new("START n=node(".$my_node->id.")
+                                    MATCH p = (n)-[]->()
+                                    RETURN p");
+  $query->execute;
+  $path = $query->fetch->[0];
+  @path_nodes = $path->nodes;
+  @path_rels = $path->relationships;
 
 =head1 DESCRIPTION
 
@@ -160,7 +175,8 @@ for you to make; the default is I<no> auto-accessors.
 
 =item get_index_by_name()
 
- $index = REST::Neo4p->get_index_by_name( $name );
+ $node_index = REST::Neo4p->get_index_by_name( $name, 'node' );
+ $relationship_index = REST::Neo4p->get_index_by_name( $name, 'relationship' );
 
 =item get_relationship_types()
 
@@ -174,6 +190,11 @@ for you to make; the default is I<no> auto-accessors.
 
 
 =back
+
+=head1 SEE ALSO
+
+L<REST::Neo4p::Node>,L<REST::Neo4p::Relationship>,L<REST::Neo4p::Index>,
+L<REST::Neo4p::Query>, L<REST::Neo4p::Path>
 
 =head1 AUTHOR
 

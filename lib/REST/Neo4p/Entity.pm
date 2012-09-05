@@ -1,4 +1,4 @@
-#$Id: Entity.pm 17640 2012-08-30 13:46:38Z jensenma $
+#$Id: Entity.pm 17650 2012-08-31 03:41:43Z jensenma $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -166,27 +166,43 @@ sub id { ${$_[0]} }
 
 sub entity_type { shift->_entry->{entity_type} }
 
-# $obj = REST::Neo4p::Entity->_entity_by_id($entity_type, $id) or
+# $obj = REST::Neo4p::Entity->_entity_by_id($entity_type, $id[, $idx_type]) or
 # $node_obj = REST::Neo4p::Node->_entity_by_id($id);
 # $relationship_obj = REST::Neo4p::Relationship->_entity_by_id($id)
+# $index_obj = REST::Neo4p::Index->_entity_by_id($id, $idx_type);
 sub _entity_by_id {
   my $class = shift;
   REST::Neo4p::ClassOnlyException->throw() if (ref $class);
   
   my $entity_type = $class;
-  my $id;
+  my ($id, $idx_type);
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   if ($entity_type eq 'entity') {
-    ($entity_type,$id) = @_;
+    ($entity_type,$id,$idx_type) = @_;
   }
   else {
-    ($id) = @_;
+    ($id,$idx_type) = @_;
+  }
+  if ($entity_type eq 'index' && !$idx_type) {
+    REST::Neo4p::LocalException->throw('Index requested, but index type not provided in last arg');
   }
   unless ($ENTITY_TABLE->{$entity_type}{$id}) {
     # not recorded as object yet
     my $agent = $REST::Neo4p::AGENT;
     REST::Neo4p::CommException->throw('Not connected') unless $agent;
-    my $decoded_resp = $agent->get_data($id);
+    my ($rq, $decoded_resp);
+    if ($entity_type eq 'index') {
+      # get list of indexes and choose the one (if any) matching the 
+      # given index name...
+      $rq = "get_${idx_type}_index";
+      $decoded_resp = $agent->$rq();
+      $decoded_resp = $decoded_resp->{$id};
+    }
+    else {
+      # usual way to get entities...
+      $rq = "get_${entity_type}";
+      $decoded_resp = $agent->$rq($id);
+    }
     $class->new_from_json_response($decoded_resp);
   }
   return $ENTITY_TABLE->{$entity_type}{$id}{self};

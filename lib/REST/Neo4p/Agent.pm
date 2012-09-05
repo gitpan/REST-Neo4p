@@ -1,4 +1,4 @@
-#$Id: Agent.pm 17640 2012-08-30 13:46:38Z jensenma $
+#$Id: Agent.pm 17650 2012-08-31 03:41:43Z jensenma $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -61,6 +61,12 @@ sub connect {
     next if /^extensions$/;
     $self->{_actions}{$_} = $json->{$_};
   }
+  # fix for incomplete discovery (relationship endpoint)
+  unless ($json->{relationship}) {
+    $self->{_actions}{relationship} = $self->{_actions}{node};
+    $self->{_actions}{relationship} =~ s/node/relationship/;
+  }
+
   return 1;
 }
 
@@ -96,7 +102,7 @@ sub AUTOLOAD {
       }
       my $resp = $self->$rq(join('/',$self->{_actions}{$action}, @url_components),%rest_params);
       eval { 
-	$self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
+	$self->{_decoded_content} = $resp->content ? $JSON->utf8->decode($resp->content) : {};
       };
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {

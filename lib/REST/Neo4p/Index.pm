@@ -26,9 +26,14 @@ sub new {
 		    name => $name 
 		   };
   $properties->{config} = $config if defined $config;
-  my $obj = $class->SUPER::new($properties);
-  $obj->_entry->{type} = $index_type;
-  $obj->_entry->{action} = "${index_type}_index";
+  return $class->SUPER::new($properties);
+}
+
+sub new_from_json_response {
+  my $class = shift;
+  my ($decoded_resp) = @_;
+  my $obj = $class->SUPER::new_from_json_response($decoded_resp);
+  $obj->_entry->{action} = $obj->_entry->{type}."_index";
   return $obj;
 }
 
@@ -187,7 +192,7 @@ API.
 
 =item add_entry()
 
- $index->add_entry( $node, $key )
+ $index->add_entry( $node, $key => $value );
 
 =item remove_entry()
 
@@ -199,6 +204,11 @@ API.
 
  @returned_nodes = $node_index->find_entries($key => $value);
  @returned_rels = $rel_index->find_entries('pet:Scoob*');
+
+In the first form, an exact match is sought. In the second (i.e., when
+a single string argument is passed), the argument is interpreted as a
+query string and passed to the index as such. The Neo4j default is
+L<Lucene|http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/queryparsersyntax.html>.
 
 =back
 
