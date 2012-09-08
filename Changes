@@ -16,3 +16,5 @@ Revision history for Perl module TCGA::Neo4j
     - auto creation of accessors now works on properties created in the constructor
     - added tests for above in 007_accessors.t
     - fixed the set_property pod (needs a hashref arg, not an array)
+0.123
+    - fixed a bug in index constructor

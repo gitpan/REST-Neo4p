@@ -21,6 +21,11 @@ sub new {
   my $class = shift;
   my ($index_type, $name, $config) = @_;
   # $config is for configuring an index (fulltext lucene e.g.)
+  if (grep /^$name$/,qw(node relationship)) {
+    my $a = $name;
+    $name = $index_type;
+    $index_type = $a;
+  }
   my $properties = { 
 		    _addl_components => [$index_type], 
 		    name => $name 

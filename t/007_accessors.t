@@ -1,6 +1,6 @@
 #-*-perl-*-
 #$Id: 007_accessors.t 17661 2012-09-08 16:37:58Z jensenma $
-use Test::More tests => 23;
+use Test::More tests => 25;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -13,7 +13,7 @@ eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 22;
+my $num_live_tests = 24;
 
 use_ok('REST::Neo4p');
 
@@ -48,11 +48,14 @@ SKIP : {
   lives_and { is $n3->blue, 3 } 'blue getter';
   lives_and { ok $n3->set_blue(5) } 'blue setter called';
   lives_and { is $n3->blue, 5 } 'blue setter works';
+  my $idx;
+  lives_ok {$idx = REST::Neo4p::Index->new('relationship','heydude')} 'index should be created np';
 
   CLEANUP : {
       ok $r12->remove, 'remove relationship';
       ok $n1->remove, 'remove node';
       ok $n2->remove, 'remove node';
       ok $n3->remove, 'remove node';
+      ok $idx->remove, 'remove index';
   }
 }

@@ -64,7 +64,7 @@ sub new_from_json_response {
     $ENTITY_TABLE->{$entity_type}{$obj}{self_url} = $self_url;
     $ENTITY_TABLE->{$entity_type}{$obj}{type} = $decoded_resp->{type};
   }
-  if ($REST::Neo4p::CREATE_AUTO_ACCESSORS) {
+  if ($REST::Neo4p::CREATE_AUTO_ACCESSORS && ($entity_type ne 'index')) {
     my $self =  $ENTITY_TABLE->{$entity_type}{$obj}{self};
     my $props = $self->get_properties;
     for (keys %$props) { $self->_create_accessors($_) unless $self->can($_); }

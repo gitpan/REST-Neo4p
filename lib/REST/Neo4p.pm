@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.122';
+  $REST::Neo4p::VERSION = '0.123';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
