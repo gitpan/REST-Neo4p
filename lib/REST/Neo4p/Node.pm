@@ -1,4 +1,4 @@
-#$Id: Node.pm 17650 2012-08-31 03:41:43Z jensenma $
+#$Id: Node.pm 17661 2012-09-08 16:37:58Z jensenma $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -122,8 +122,8 @@ Get the values of properties on nodes and relationships.
 
 =item set_property()
 
- $name = $node->set_property( name => "Sun Tzu" );
- $node1->relate_to($node2,"is_pal_of")->set_property( duration => 'old pal' );
+ $name = $node->set_property( {name => "Sun Tzu", occupation => "General"} );
+ $node1->relate_to($node2,"is_pal_of")->set_property( {duration => 'old pal'} );
 
 Sets values of properties on nodes and relationships.
 

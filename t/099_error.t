@@ -26,6 +26,8 @@ throws_ok { REST::Neo4p->connect('http://127.0.0.1:9999') } 'REST::Neo4p::CommEx
 
 throws_ok { REST::Neo4p::Query->new('fake query')->do() } 'REST::Neo4p::ClassOnlyException', 'Query do class only ok';
 
+throws_ok { REST::Neo4p->get_indexes() } 'REST::Neo4p::LocalException', 'No type arg on get_indexes ok';
+
 my $not_connected;
 eval {
   REST::Neo4p->connect($TEST_SERVER);

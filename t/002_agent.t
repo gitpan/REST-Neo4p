@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 002_agent.t 17619 2012-08-29 13:41:02Z jensenma $
+#$Id: 002_agent.t 17653 2012-09-05 04:54:27Z jensenma $
 use Test::More tests => 8;
 use Module::Build;
 use lib '../lib';

@@ -1,6 +1,6 @@
 #-*-perl-*-
-#$Id: 007_accessors.t 17650 2012-08-31 03:41:43Z jensenma $
-use Test::More qw(no_plan);
+#$Id: 007_accessors.t 17661 2012-09-08 16:37:58Z jensenma $
+use Test::More tests => 23;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -13,7 +13,7 @@ eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 1;
+my $num_live_tests = 22;
 
 use_ok('REST::Neo4p');
 
@@ -42,9 +42,17 @@ SKIP : {
   lives_and { ok $r12->set_amount('little bit') } 'setter called';
   lives_and { is $r12->amount, 'little bit' } 'setter works';
 
+  ok my $n3 = REST::Neo4p::Node->new( {red => 1, yellow => 2, blue => 3} ), 'node3, properties created in constructor';
+  lives_and { is $n3->red, 1 } 'red getter';
+  lives_and { is $n3->yellow, 2 } 'yellow getter';
+  lives_and { is $n3->blue, 3 } 'blue getter';
+  lives_and { ok $n3->set_blue(5) } 'blue setter called';
+  lives_and { is $n3->blue, 5 } 'blue setter works';
+
   CLEANUP : {
       ok $r12->remove, 'remove relationship';
       ok $n1->remove, 'remove node';
-      ok $n2->remove, 'remove ndoe';
+      ok $n2->remove, 'remove node';
+      ok $n3->remove, 'remove node';
   }
 }

@@ -1,4 +1,4 @@
-#$Id: Agent.pm 17650 2012-08-31 03:41:43Z jensenma $
+#$Id: Agent.pm 17661 2012-09-08 16:37:58Z jensenma $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -97,7 +97,7 @@ sub AUTOLOAD {
       my @url_components = @_;
       my %rest_params = ();
       # look for a hashref as final arg containing field => value pairs
-      if (ref $url_components[-1] && (ref $url_components[-1] eq 'HASH')) {
+      if (@url_components && ref $url_components[-1] && (ref $url_components[-1] eq 'HASH')) {
 	%rest_params = %{ pop @url_components };
       }
       my $resp = $self->$rq(join('/',$self->{_actions}{$action}, @url_components),%rest_params);

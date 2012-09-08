@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 17650 2012-08-31 03:41:43Z jensenma $
+#$Id: Neo4p.pm 17661 2012-09-08 16:37:58Z jensenma $
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.121';
+  $REST::Neo4p::VERSION = '0.122';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -61,6 +61,9 @@ sub get_indexes {
   my $class = shift;
   my ($type) = @_;
   REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  unless ($type) {
+    REST::Neo4p::LocalException->throw('Type argument (node or relationship) required');
+  }
   my $decoded_resp = $AGENT->get_data('index',$type);
   my @ret;
   # this rest method returns a hash, not an array (as for relationships)

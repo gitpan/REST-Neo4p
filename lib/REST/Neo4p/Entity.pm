@@ -1,4 +1,4 @@
-#$Id: Entity.pm 17650 2012-08-31 03:41:43Z jensenma $
+#$Id: Entity.pm 17661 2012-09-08 16:37:58Z jensenma $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -55,21 +55,21 @@ sub new_from_json_response {
   my $self_url  = $decoded_resp->{self} || $decoded_resp->{template};
   $self_url =~ s/{key}.*$//; # another kludge for get_indexes
   my ($obj) = $self_url =~ /([0-9]+|[a-z_]+)\/?$/i;
-  if (defined $ENTITY_TABLE->{$entity_type}{$obj}) {
-    # already have the object
-    return $ENTITY_TABLE->{$entity_type}{$obj}{self};
-  }
-  else {
-    # another kludge for get_indexes
-    if ($decoded_resp->{template}) {
+  unless (defined $ENTITY_TABLE->{$entity_type}{$obj}) {
+    if ($decoded_resp->{template}) {     # another kludge for get_indexes
       ($decoded_resp->{type}) = $decoded_resp->{template} =~ m|index/([a-z]+)/|;
     }
     $ENTITY_TABLE->{$entity_type}{$obj}{entity_type} = $entity_type;
-    $ENTITY_TABLE->{$entity_type}{$obj}{self} = \$obj;
+    $ENTITY_TABLE->{$entity_type}{$obj}{self} = bless \$obj, $class;
     $ENTITY_TABLE->{$entity_type}{$obj}{self_url} = $self_url;
     $ENTITY_TABLE->{$entity_type}{$obj}{type} = $decoded_resp->{type};
-    bless \$obj, $class;
   }
+  if ($REST::Neo4p::CREATE_AUTO_ACCESSORS) {
+    my $self =  $ENTITY_TABLE->{$entity_type}{$obj}{self};
+    my $props = $self->get_properties;
+    for (keys %$props) { $self->_create_accessors($_) unless $self->can($_); }
+  }
+  return $ENTITY_TABLE->{$entity_type}{$obj}{self};
 }
 
 # remove() - delete the node and destroy the object
