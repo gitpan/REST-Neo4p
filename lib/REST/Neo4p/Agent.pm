@@ -19,6 +19,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
   $self->default_header( 'Accept' => 'application/json' );
   $self->default_header( 'Content-Type' => 'application/json' );
+  $self->default_header( 'X-Stream' => 'true' );
   $self->protocols_allowed( ['http','https'] );
   bless $self, $class;
 }
@@ -78,6 +79,22 @@ sub location { shift->{_location} }
 
 sub available_actions { keys %{shift->{_actions}} }
 
+sub no_stream {
+  my $self = shift;
+  my $default_headers = $self->default_headers;
+  $default_headers->remove_header('X-Stream');
+  $self->default_headers($default_headers);
+}
+
+sub stream {
+  my $self = shift;
+  my $default_headers = $self->default_headers;
+  unless ($default_headers->header('X-Stream')) {
+    $default_headers->header('X-Stream' => 'true');
+  }
+  $self->default_headers($default_headers);
+}
+
 # autoload getters for discovered neo4j rest urls
 
 sub AUTOLOAD {
@@ -106,7 +123,8 @@ sub AUTOLOAD {
       };
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {
-	  REST::Neo4p::Neo4jException->throw( 
+	  my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::Neo4jException';
+	  $xclass->throw( 
 	    code => $resp->code,
 	    neo4j_message => $self->{_decoded_content}->{message},
 	    neo4j_exception => $self->{_decoded_content}->{exception},
@@ -114,10 +132,11 @@ sub AUTOLOAD {
 	      );
 	}
 	else {
-	  REST::Neo4p::CommException->throw( 
+	  my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
+	  $xclass->throw( 
 	    code => $resp->code,
 	    message => $resp->message
-	    );
+	   );
 	}
       }
       $self->{_location} = $resp->header('Location');
@@ -136,12 +155,18 @@ sub AUTOLOAD {
 	    neo4j_exception => $self->{_decoded_content}->{exception},
 	    neo4j_stacktrace =>  $self->{_decoded_content}->{stacktrace}
 	   );
-	  $error_fields{neo4j_exception} =~ /^Syntax/ ? 
-	    REST::Neo4p::QuerySyntaxException->throw(%error_fields) :
-		REST::Neo4p::Neo4jException->throw(%error_fields);
+	  my $xclass = 'REST::Neo4p::Neo4jException';
+	  if ($resp->code == 404) {
+	    $xclass = 'REST::Neo4p::NotFoundException';
+	  }
+	  if ( $error_fields{neo4j_exception} =~ /^Syntax/ ) {
+	    $xclass = 'REST::Neo4p::QuerySyntaxException';
+	  }
+	  $xclass->throw(%error_fields);
 	}
 	else {
-	  REST::Neo4p::CommException->throw(
+	  my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
+	  $xclass->throw( 
 	    code => $resp->code,
 	    message => $resp->message
 	   );
@@ -189,6 +214,20 @@ L<REST::Neo4p::Exceptions>.
 
 C<REST::Neo4p::Agent> is a subclass of L<LWP::UserAgent|LWP::UserAgent>
 and inherits its capabilities.
+
+According to the Neo4j recommendation, the agent requests streamed
+responses by default (i.e.,
+
+ X-Stream:true
+
+is a default header. This can be removed by calling
+
+ $agent->no_stream
+
+and added back with 
+
+ $agent->stream
+
 
 =head1 METHODS
 
@@ -258,10 +297,6 @@ Returns the version of the connected Neo4j server.
 
 Returns all discovered actions.
 
-=item errmsg()
-
-Returns last error message. This is undef if the request was successful.
-
 =item location()
 
  $agent->post_node(); # create new node
@@ -314,6 +349,18 @@ is a hashref, it will be sent in the request as (encoded) JSON content.
 Returns the response content of the last agent request, as decoded by
 L<JSON|JSON>. It is generally a reference, but can be a scalar if a
 bareword was returned by the server.
+
+=item no_stream()
+
+ $agent->no_stream;
+
+Removes C<X-Stream: true> from the default headers.
+
+=item stream()
+
+ $agent->stream;
+
+Adds C<X-Stream: true> to the default headers.
 
 =back
 

@@ -29,10 +29,19 @@ sub relate_to {
   if ($rel_props) {
     $content->{data} = $rel_props;
   }
-
-  my $decoded_resp = $agent->post_data(['node',$$self,$suffix],
-					 $content);
-
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->post_data(['node',$$self,$suffix],
+				      $content);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   return REST::Neo4p::Relationship->new_from_json_response($decoded_resp);
 }
 
@@ -59,7 +68,18 @@ sub get_relationships {
       REST::Neo4p::LocalException->throw("Got '$direction' for relationship direction; expected [in|out|all]");
     };
   }
-  my $decoded_resp = $agent->get_data( 'node',$$self,$self->_get_url_suffix($action) );
+  my $decoded_resp;
+  eval { 
+    $decoded_resp = $agent->get_data( 'node',$$self,$self->_get_url_suffix($action) );
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   my @ret;
   if (ref $decoded_resp eq 'HASH') {
     $decoded_resp = [$decoded_resp];

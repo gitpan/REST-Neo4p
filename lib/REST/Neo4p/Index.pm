@@ -63,11 +63,22 @@ sub add_entry {
   }
   my $agent = $REST::Neo4p::AGENT;
   my $rq = "post_".$self->_action;
-  my $decoded_resp = $agent->$rq([$self->name], 
-				 { uri => $entity->_self_url,
-				   key => $key,
-				   value => uri_escape($value) }
-				);
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->$rq([$self->name], 
+				{ uri => $entity->_self_url,
+				  key => $key,
+				  value => uri_escape($value) }
+			       );
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   return 1;
 }
 
@@ -94,8 +105,17 @@ sub remove_entry {
   else { # !defined $key && !defined $value
     @addl_components = ($$entity);
   }
-  $agent->$rq($self->name, @addl_components);
-
+  eval {
+    $agent->$rq($self->name, @addl_components);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   return 1;
 }
 
@@ -110,15 +130,35 @@ sub find_entries {
   my $agent = $REST::Neo4p::AGENT;
   my $rq = 'get_'.$self->_action;
   if ($value) { # exact key->value match
-    $decoded_resp = $agent->$rq( $self->name,
-				 $key, uri_escape($value) );
+    eval {
+      $decoded_resp = $agent->$rq( $self->name,
+				   $key, uri_escape($value) );
+    };
+    my $e;
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
   }
   else { # a lucene query string is first arg
     # note in below: cannot pass { query => $query } to 
     # request, neo4j interface doesn't work with "form fills"
     # must add the ?query string to the request url.
-    $decoded_resp = $agent->$rq( $self->name,
-				 "?query=".uri_escape($query) );
+    eval {
+      $decoded_resp = $agent->$rq( $self->name,
+				   "?query=".uri_escape($query) );
+    };
+    my $e;
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
   }
   my @ret; 
   my $class = $self->type eq 'node' ? 'REST::Neo4p::Node' :

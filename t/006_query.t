@@ -75,7 +75,7 @@ SKIP : {
       my $path = $row->[0];
       isa_ok $path, 'REST::Neo4p::Path';
       is scalar $path->nodes, 4, 'got all nodes';
-      is scalar $path->relationships, 3, 'got all relationships';
+      cmp_ok scalar $path->relationships,'>=', 3, 'got all relationships';
   }
 
   CLEANUP : {

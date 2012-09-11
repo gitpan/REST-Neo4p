@@ -28,10 +28,20 @@ sub new {
   my $url_components = delete $properties->{_addl_components};
   my $agent = $REST::Neo4p::AGENT;
   REST::Neo4p::CommException->throw('Not connected') unless $agent;
-
-  my $decoded_resp = $agent->post_data([$entity_type,
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->post_data([$entity_type,
 					$url_components ? @$url_components : ()],
 				       $properties);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle cases
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   $decoded_resp->{self} ||= $agent->location;
   return $class->new_from_json_response($decoded_resp);
 }
@@ -41,7 +51,7 @@ sub new_from_json_response {
   my ($entity_type) = $class =~ /.*::(.*)/;
   $entity_type = lc $entity_type;
   if ($entity_type eq 'entity') {
-    REST::Neo4p::NotSuppException->("Cannot use ".__PACKAGE__." directly");
+    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly");
   }
   my ($decoded_resp) = (@_);
   unless ($ENTITY_TABLE->{$entity_type}{_actions}) {
@@ -79,7 +89,17 @@ sub remove {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
-  $agent->delete_data($entity_type, @url_components, $$self);
+  eval {
+    $agent->delete_data($entity_type, @url_components, $$self);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   $self->DESTROY;
   return 1;
 }
@@ -96,8 +116,18 @@ sub set_property {
   my @ret;
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
   for (keys %$props) {
-    $agent->put_data([$entity_type,$$self,$suffix,
-		      $_], $props->{$_});
+    eval {
+      $agent->put_data([$entity_type,$$self,$suffix,
+			$_], $props->{$_});
+    };
+    my $e;
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
   }
   # create accessors
   if ($REST::Neo4p::CREATE_AUTO_ACCESSORS) {
@@ -126,8 +156,8 @@ sub get_property {
     if ( $e = Exception::Class->caught('REST::Neo4p::CommError')) {
       $e->rethrow;
     }
-    elsif ( $e = Exception::Class->caught() ) {
-      ref $e ? $e->rethrow : die $e;
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
     }
     push @ret, $decoded_resp;
   }
@@ -143,7 +173,18 @@ sub get_properties {
   REST::Neo4p::CommException->throw('Not connected') unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
-  my $decoded_resp = $agent->get_data($entity_type,$$self,$suffix);
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->get_data($entity_type,$$self,$suffix);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   return $decoded_resp;
   
 }
@@ -157,7 +198,17 @@ sub remove_property {
   REST::Neo4p::CommException->throw('Not connected') unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   foreach (@props) {
-    $agent->delete_data($entity_type,$$self,$suffix,$_);
+    eval {
+      $agent->delete_data($entity_type,$$self,$suffix,$_);
+    };
+    my $e;
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
   }
   return 1;
 }
@@ -195,13 +246,33 @@ sub _entity_by_id {
       # get list of indexes and choose the one (if any) matching the 
       # given index name...
       $rq = "get_${idx_type}_index";
-      $decoded_resp = $agent->$rq();
+      eval {
+	$decoded_resp = $agent->$rq();
+      };
+      my $e;
+      if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+	# TODO : handle different classes
+	$e->rethrow;
+      }
+      elsif ($@) {
+	ref $@ ? $@->rethrow : die $@;
+      }
       $decoded_resp = $decoded_resp->{$id};
     }
     else {
       # usual way to get entities...
       $rq = "get_${entity_type}";
-      $decoded_resp = $agent->$rq($id);
+      eval {
+	$decoded_resp = $agent->$rq($id);
+      };
+      my $e;
+      if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+	# TODO : handle different classes
+	$e->rethrow;
+      }
+      elsif ($@) {
+	ref $@ ? $@->rethrow : die $@;
+      }
     }
     $class->new_from_json_response($decoded_resp);
   }

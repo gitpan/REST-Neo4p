@@ -26,8 +26,30 @@ sub new_from_json_response {
     my $reln_url = shift @reln_urls;
     my ($node_id) = $node_url =~ /([0-9]+)$/;
     my ($reln_id) = $reln_url =~ /([0-9]+)$/ if $reln_url;
-    push @{$obj->{_nodes}}, REST::Neo4p::Node->_entity_by_id($node_id);
-    push @{$obj->{_relationships}}, REST::Neo4p::Relationship->_entity_by_id($reln_id) if $reln_id;
+    my ($node, $relationship);
+    eval {
+      $node = REST::Neo4p::Node->_entity_by_id($node_id);
+    };
+    my $e;
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
+    push @{$obj->{_nodes}}, $node;
+    eval {
+      $relationship =  REST::Neo4p::Relationship->_entity_by_id($reln_id) if $reln_id;
+    };
+    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+      # TODO : handle different classes
+      $e->rethrow;
+    }
+    elsif ($@) {
+      ref $@ ? $@->rethrow : die $@;
+    }
+    push @{$obj->{_relationships}}, $relationship;
   }
   REST::Neo4p::LocalException->throw('Extra relationships in path') if @reln_urls;
   return $obj;

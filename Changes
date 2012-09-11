@@ -18,3 +18,7 @@ Revision history for Perl module TCGA::Neo4j
     - fixed the set_property pod (needs a hashref arg, not an array)
 0.123
     - fixed a bug in index constructor
+0.124
+    - try/catch (with eval {}) all REST::Neo4p::Agent calls; rethrow
+    - REST::Neo4p::Agent - 'X-Stream: true' added as a default header
+      (use $agent->no_stream to remove)

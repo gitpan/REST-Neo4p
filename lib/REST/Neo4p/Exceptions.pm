@@ -21,6 +21,12 @@ use Exception::Class (
     fields => [ 'code' ],
     description => 'Network or HTTP errors'
    },
+  'REST::Neo4p::NotFoundException' => {
+    isa => 'REST::Neo4p::Neo4jException',
+    fields => [ 'code', 'neo4j_message', 
+		'neo4j_exception', 'neo4j_stacktrace' ],
+    description => 'URL or item not found'
+   },
   'REST::Neo4p::QuerySyntaxException' =>
     {
       isa => 'REST::Neo4p::Neo4jException',

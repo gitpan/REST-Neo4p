@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.123';
+  $REST::Neo4p::VERSION = '0.124';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -24,7 +24,18 @@ sub connect {
   my $class = shift;
   my ($server_address) = @_;
   REST::Neo4p::LocalException->throw("Server address not set")  unless $server_address;
-  $AGENT = REST::Neo4p::Agent->new();
+  eval {
+    $AGENT = REST::Neo4p::Agent->new();
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+
   return 1 if $AGENT->connect($server_address);
   return;
 }
@@ -33,27 +44,74 @@ sub connect {
 sub get_node_by_id {
   my $class = shift;
   my ($id) = @_;
-  return REST::Neo4p::Node->_entity_by_id($id);
+  my $node;
+  eval {
+    $node = REST::Neo4p::Node->_entity_by_id($id);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $node;
 }
 
 # $reln = REST::Neo4p->get_relationship_by_id($id);
 sub get_relationship_by_id {
   my $class = shift;
   my ($id) = @_;
-  return REST::Neo4p::Relationship->_entity_by_id($id);
+  my $relationship;
+  eval {
+    $relationship = REST::Neo4p::Relationship->_entity_by_id($id);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $relationship;
 }
 
 sub get_index_by_name {
   my $class = shift;
   my ($name, $type) = @_;
-  return REST::Neo4p::Index->_entity_by_id($name,$type);
+  my $idx;
+  eval {
+    $idx = REST::Neo4p::Index->_entity_by_id($name,$type);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $idx;
 }
 
 # @all_reln_types = REST::Neo4p->get_relationship_types
 sub get_relationship_types {
   my $class = shift;
   REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
-  my $decoded_json = $AGENT->get_relationship_types();
+  my $decoded_json;
+  eval {
+    $decoded_json = $AGENT->get_relationship_types();
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   return ref $decoded_json ? @$decoded_json : $decoded_json;
 }
 
@@ -64,7 +122,18 @@ sub get_indexes {
   unless ($type) {
     REST::Neo4p::LocalException->throw('Type argument (node or relationship) required');
   }
-  my $decoded_resp = $AGENT->get_data('index',$type);
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $AGENT->get_data('index',$type);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
   my @ret;
   # this rest method returns a hash, not an array (as for relationships)
   for (keys %$decoded_resp) {

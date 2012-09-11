@@ -44,8 +44,8 @@ sub execute {
     $e->rethrow if ($self->{RaiseError});
     return;
   }
-  elsif ($e = Exception::Class->caught()) {
-    ref $e ? $e->rethrow : die $e;
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $e;
   }
   $self->{NAME} = $resp && $resp->{columns};
   $self->{NUM_OF_FIELDS} = $resp ? scalar @{$resp->{columns}} : 0;
