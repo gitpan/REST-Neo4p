@@ -119,7 +119,7 @@ sub AUTOLOAD {
       }
       my $resp = $self->$rq(join('/',$self->{_actions}{$action}, @url_components),%rest_params);
       eval { 
-	$self->{_decoded_content} = $resp->content ? $JSON->utf8->decode($resp->content) : {};
+	$self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
       };
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {
@@ -143,9 +143,12 @@ sub AUTOLOAD {
       last;
     };
     /post|put/ && do {
-      my ($url_components, $content) = @_;
+      my ($url_components, $content, $addl_headers) = @_;
       $content = $JSON->encode($content) if $content;
-      my $resp  = $self->$rq(join('/',$self->{_actions}{$action},@$url_components), 'Content-Type' => 'application/json', Content=> $content);
+      unless (!$addl_headers || (ref $addl_headers eq 'HASH')) {
+	REST::Neo4p::LocalException->throw('Arg 3 must be a hashref of additional headers');
+      }
+      my $resp  = $self->$rq(join('/',$self->{_actions}{$action},@$url_components), 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
       $self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {
@@ -321,17 +324,22 @@ is a hashref, it will be sent as key-value form parameters.
 Makes a PUT request to the REST endpoint mapped to {action}. The first
 argument, if present, must be an array B<reference> of additional URL
 components. The second argument, if present, is a hashref that will be
-sent in the request as (encoded) JSON content.
+sent in the request as (encoded) JSON content. The third argument, if 
+present, is a hashref containing additional request headers.
 
 =item post_{action}()
 
  # create a new node with given properties
  $agent->post_node({ name => 'Wanda' });
+ # do a cypher query and save content to file
+ $agent->post_cypher([], { query => 'START n=node(*) RETURN n', params=>{}},
+                     { ':content_file' => $my_file_name });
 
 Makes a POST request to the REST endpoint mapped to {action}. The first
 argument, if present, must be an array B<reference> of additional URL
 components. The second argument, if present, is a hashref that will be
-sent in the request as (encoded) JSON content.
+sent in the request as (encoded) JSON content. The third argument, if 
+present, is a hashref containing additional request headers.
 
 =item delete_{action}()
 

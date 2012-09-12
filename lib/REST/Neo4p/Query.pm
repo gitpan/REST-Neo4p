@@ -2,12 +2,16 @@
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
+use JSON::Streaming::Reader;
+use File::Temp qw(tempfile);
 use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
   $REST::Neo4p::Query::VERSION = '0.1';
 }
+
+my $BUFSIZE = 4096;
 
 sub new {
   my $class = shift;
@@ -22,7 +26,8 @@ sub new {
 	  '_params' => $params || {},
 	  'Statement' => $q_string,
 	  'NUM_OF_PARAMS' => $params ? scalar keys %$params : 0,
-	  'ParamValues' => $params
+	  'ParamValues' => $params,
+	  '_tempfile' => ''
 	}, $class;
 }
 
@@ -33,10 +38,15 @@ sub execute {
   $self->{_error} = undef;
   $self->{_decoded_resp} = undef;
   $self->{NAME} = undef;
-  $self->{_returned_rows} = undef;
+  my $temp_fh;
+  ($temp_fh, $self->{_tempfile}) = tempfile();
+  unless ($temp_fh) {
+    REST::Neo4p::LocalException->throw("Can't create query result tempfile : $!");
+  }
   my $resp;
   eval {
-    $resp = $self->{_decoded_resp} = $agent->post_cypher([], { query => $self->query, params => $self->params } );
+    $agent->post_cypher([], { query => $self->query, params => $self->params },
+		       {':content_file' => $self->{_tempfile}});
   };
   my $e;
   if ($e = Exception::Class->caught('REST::Neo4p::Neo4jException') ) {
@@ -47,55 +57,105 @@ sub execute {
   elsif ($@) {
     ref $@ ? $@->rethrow : die $e;
   }
-  $self->{NAME} = $resp && $resp->{columns};
-  $self->{NUM_OF_FIELDS} = $resp ? scalar @{$resp->{columns}} : 0;
-  $self->{_returned_rows} = $resp && $resp->{data};
-  return scalar @{$self->{_returned_rows}};
-}
 
+  # set up iterator
+  my $columns_elt;
+  my $buf;
+  my $jsonr = JSON::Streaming::Reader->for_stream($temp_fh);
 
-sub do {
-  my $class = shift;
-  REST::Neo4p::ClassOnlyException->throw() if (ref $class);
-
-}
-
-sub fetchrow_array {
-  my $self = shift;
-  return unless $self->{_returned_rows} && @{$self->{_returned_rows}};
-  my $row = shift @{$self->{_returned_rows}};
-  my @ret;
-  foreach my $elt (@$row) {
-    for (ref($elt)) {
-      !$_ && do {
-	push @ret, $elt;
-	last;
-      };
-      /HASH/ && do {
-	my $entity_type;
-	eval {
-	  $entity_type = _response_entity($elt);
-	};
-	my $e;
-	if ($e = Exception::Class->caught()) {
-	  ref $e ? $e->rethrow : die $e;
-	}
-	my $entity_class = 'REST::Neo4p::'.$entity_type;
-	push @ret, $entity_class->new_from_json_response($elt);
-	last;
-      };
-      /ARRAY/ && do {
-	REST::Neo4p::LocalException->("Don't know what to do with arrays yet");
-	last;
-      };
-      do {
-	REST::Neo4p::QueryResponseException->throw("Can't parse query response");
-      };
+  while ( my $ret = $jsonr->get_token ) {
+    if ($$ret[0] eq 'start_property' && $$ret[1] eq 'columns') {
+      $columns_elt = $jsonr->slurp;
+      last;
     }
   }
-  return \@ret;
+  unless ($columns_elt) {
+    REST::Neo4p::LocalException->throw("Can't parse query reponse json (missing 'columns' element)");
+  }
+  $self->{NAME} = $columns_elt;
+  $self->{NUM_OF_FIELDS} = scalar @$columns_elt;
+  # position parser cursor
+  my $in_data;
+  my $cursor_set;
+  CURSOR :
+      while ( my ($token_type, @data) = @{$jsonr->get_token} ) {
+	TOKEN_TYPE :
+	    for ($token_type) {
+	      /start_property/ && do {
+		$in_data = 1 if ($data[0] && $data[0] eq 'data');
+		last TOKEN_TYPE;
+	      };
+	      /start_array/ && do {
+		if ($in_data) {
+		  $cursor_set = 1;
+		  last CURSOR;
+		}
+		last TOKEN_TYPE;
+	      };
+	    }
+      }
+  unless ($cursor_set) {
+    REST::Neo4p::LocalException->throw("Can't parse query response (start of data array not found)");
+  }
+  $self->{_iterator} = 
+    sub {
+      return unless defined $temp_fh;
+      my @ret;
+      my $row;
+      my ($token_type, @data) = @{$jsonr->get_token};
+      for ($token_type) {
+	/start_array/ && do {
+	  $row = $jsonr->slurp;
+	  last;
+	};
+	/end_array/ && do { # finished
+	  $temp_fh->close;
+	  unlink $self->{_tempfile};
+	  undef $self->{_tempfile};
+	  undef $temp_fh;
+	  return;
+	};
+	do { # fail
+	  REST::Neo4p::LocalException->throw("Can't parse query resonse (unexpected token looking for next row)");
+	  last;
+	};
+      }
+      foreach my $elt (@$row) {
+	for (ref($elt)) {
+	  !$_ && do {
+	    push @ret, $elt;
+	    last;
+	  };
+	  /HASH/ && do {
+	    my $entity_type;
+	    eval {
+	      $entity_type = _response_entity($elt);
+	    };
+	    my $e;
+	    if ($e = Exception::Class->caught()) {
+	      ref $e ? $e->rethrow : die $e;
+	    }
+	    my $entity_class = 'REST::Neo4p::'.$entity_type;
+	    push @ret, $entity_class->new_from_json_response($elt);
+	    last;
+	  };
+	  /ARRAY/ && do {
+	    REST::Neo4p::LocalException->("Don't know what to do with arrays yet");
+	    last;
+	  };
+	  do {
+	    REST::Neo4p::QueryResponseException->throw("Can't parse query response (row doesn't make sense)");
+	  };
+	}
+      }
+      return \@ret;
+    };
+  return 1;
 }
-sub fetch { shift->fetchrow_array(@_) }
+
+sub fetchrow_arrayref { shift->{_iterator}->() }
+
+sub fetch { shift->fetchrow_arrayref(@_) }
 
 sub column_names {
   my $self = shift;
@@ -142,6 +202,10 @@ sub _response_entity {
   }
 }
 
+sub DESTROY {
+  my $self = shift;
+  $self->{_tempfile} && unlink $self->{_tempfile};
+}
 
 =head1 NAME
 
@@ -161,6 +225,15 @@ C<REST::Neo4p::Query> encapsulates Neo4j Cypher language queries,
 executing them via C<REST::Neo4p::Agent> and returning an iterator
 over the rows, in the spirit of L<DBI|DBI>.
 
+=head2 Streaming
+
+C<execute()> captures the Neo4j query response in a temp
+file. C<fetch()> iterates over the JSON in the response using
+L<JSON::Streaming::Reader|JSON::Streaming::Reader>. So go ahead and
+make those 100 meg queries. The tempfile is unlinked after the
+iterator runs out of rows, or upon object destruction, which ever
+comes first.
+
 =head1 METHODS
 
 =over
@@ -179,7 +252,7 @@ Create a new query object. First argument is the Cypher query
 
 Execute the query on the server.
 
-=item fetch(), fetchrow_array()
+=item fetch(), fetchrow_arrayref()
 
  $query = REST::Neo4p::Query->new('START n=node(0) RETURN n, n.name');
  $query->execute;
@@ -209,7 +282,7 @@ immediately (e.g., to catch the exception in an C<eval> block).
 
 =head1 SEE ALSO
 
-L<REST::Neo4p>, L<REST::Neo4p::Agent>.
+L<REST::Neo4p>, L<REST::Neo4p::Path>,L<REST::Neo4p::Agent>.
 
 =head1 AUTHOR
 

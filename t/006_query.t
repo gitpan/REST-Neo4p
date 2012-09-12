@@ -55,7 +55,8 @@ SKIP : {
 
   ok my $q = REST::Neo4p::Query->new("START n=node($$n1) MATCH (n)-->(x) RETURN x.name, x"), 'new node query';
  $q->{RaiseError} = 1;
-  is $q->execute, 2,'execute and return 2 rows';
+  $DB::single =1;
+  ok $q->execute, 'execute query';
   while (my $row = $q->fetch) {
     like $row->[0], qr/Wilma|Pebbles/, 'got name';
     isa_ok($row->[1], 'REST::Neo4p::Node');
@@ -63,7 +64,7 @@ SKIP : {
   
   ok $q = REST::Neo4p::Query->new("START n=node($$n4) MATCH (n)-[r]-(x) WHERE type(r) = 'pal_of' RETURN r, x.name"), 'new relationship query';
   is $q->execute, 1, 'execute and return 1 row';
-  while (my $row = $q->fetchrow_array) {
+  while (my $row = $q->fetchrow_arrayref) {
     isa_ok($row->[0], 'REST::Neo4p::Relationship');
     is $row->[1], 'Wilma', "Wilma is Betty's pal";
   }

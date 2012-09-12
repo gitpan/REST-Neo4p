@@ -22,3 +22,6 @@ Revision history for Perl module TCGA::Neo4j
     - try/catch (with eval {}) all REST::Neo4p::Agent calls; rethrow
     - REST::Neo4p::Agent - 'X-Stream: true' added as a default header
       (use $agent->no_stream to remove)
+0.125
+    - Query responses are now sent to disk and rows are streamed from
+      there by the fetch() iterator

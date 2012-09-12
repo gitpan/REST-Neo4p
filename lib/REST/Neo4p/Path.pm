@@ -1,6 +1,5 @@
 #$Id: Path.pm 17640 2012-08-30 13:46:38Z jensenma $
 package REST::Neo4p::Path;
-use REST::Neo4p;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use strict;

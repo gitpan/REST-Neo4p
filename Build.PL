@@ -11,6 +11,7 @@ my $build =  Module::Build->new
       license => 'perl',
       requires => {
 	'JSON' => 2.0,
+	'JSON::Streaming::Reader' => 0.05,
 	'URI::Escape' => 3.3,
 	'LWP' => 0,
 	'Exception::Class' => 1.3
