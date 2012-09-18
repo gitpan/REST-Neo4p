@@ -1,4 +1,4 @@
-#$Id: Query.pm 17640 2012-08-30 13:46:38Z jensenma $
+#$Id: Query.pm 17665 2012-09-12 04:01:50Z jensenma $
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
@@ -257,7 +257,7 @@ Execute the query on the server.
  $query = REST::Neo4p::Query->new('START n=node(0) RETURN n, n.name');
  $query->execute;
  while ($row = $query->fetch) { 
-   print 'It works!" if ($row->[0]->get_property('name') == $row->[1]);
+   print 'It works!' if ($row->[0]->get_property('name') == $row->[1]);
  }
 
 Fetch the next row of returned data (as an arrayref). Nodes are

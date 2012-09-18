@@ -31,8 +31,8 @@ REST::Neo4p::Relationship - Neo4j relationship object
 
 =head1 SYNOPSIS
 
- $n1 = $REST::Neo4p::Node->new( {name => 'Harry'} )
- $n2 = $REST::Neo4p::Node->new( {name => 'Sally'} );
+ $n1 = REST::Neo4p::Node->new( {name => 'Harry'} )
+ $n2 = REST::Neo4p::Node->new( {name => 'Sally'} );
  $r1 = $n1->relate_to($n2, 'met');
  $r1->set_property({ when => 'July' });
 

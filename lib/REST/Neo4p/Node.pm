@@ -1,4 +1,4 @@
-#$Id: Node.pm 17661 2012-09-08 16:37:58Z jensenma $
+#$Id: Node.pm 17665 2012-09-12 04:01:50Z jensenma $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -105,16 +105,16 @@ REST::Neo4p::Node - Neo4j node object
 
 =head1 SYNOPSIS
 
- $n1 = $REST::Neo4p::Node->new( {name => 'Ferb'} )
- $n2 = $REST::Neo4p::Node->new( {name => 'Phineas'} );
- $n3 = $REST::Neo4p::Node->new( {name => 'Perry'} );
+ $n1 = REST::Neo4p::Node->new( {name => 'Ferb'} )
+ $n2 = REST::Neo4p::Node->new( {name => 'Phineas'} );
+ $n3 = REST::Neo4p::Node->new( {name => 'Perry'} );
  $n1->relate_to($n2, 'brother');
  $n3->relate_to($n1, 'pet');
  $n3->set_property({ species => 'Ornithorhynchus anatinus' });
 
 =head1 DESCRIPTION
 
-C<REST::Neo4p::Node> objects represent Neo4j nodes. 
+C<REST::Neo4p::Node> objects represent Neo4j nodes.
 
 =head1 METHODS
 

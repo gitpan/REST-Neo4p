@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 006_query.t 17640 2012-08-30 13:46:38Z jensenma $
+#$Id: 006_query.t 17665 2012-09-12 04:01:50Z jensenma $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;

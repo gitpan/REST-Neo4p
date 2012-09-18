@@ -25,3 +25,5 @@ Revision history for Perl module TCGA::Neo4j
 0.125
     - Query responses are now sent to disk and rows are streamed from
       there by the fetch() iterator
+0.1251
+    - Pod fixes (thanks Mat)
