@@ -26,9 +26,12 @@ sub new {
     $name = $index_type;
     $index_type = $a;
   }
-  my $properties = { 
-		    _addl_components => [$index_type], 
-		    name => $name 
+  unless (grep /^$index_type$/,qw(node relationship)) {
+    REST::Neo4p::LocalException->throw("Index type must be either node or relationship");
+  }
+  my $properties = {
+		    _addl_components => [$index_type],
+		    name => $name
 		   };
   $properties->{config} = $config if defined $config;
   return $class->SUPER::new($properties);
@@ -39,6 +42,15 @@ sub new_from_json_response {
   my ($decoded_resp) = @_;
   my $obj = $class->SUPER::new_from_json_response($decoded_resp);
   $obj->_entry->{action} = $obj->_entry->{type}."_index";
+  return $obj;
+}
+
+sub new_from_batch_response {
+  my $class = shift;
+  my ($id_token,$type) = @_;
+  my $obj = $class->SUPER::new_from_batch_response($id_token);
+  $obj->_entry->{type} = $type;  
+  $obj->_entry->{action} = "${type}_index";
   return $obj;
 }
 
@@ -119,11 +131,11 @@ sub remove_entry {
   return 1;
 }
 
-
-# @found_entities = $index->find($key => $value);
-# @found_entities = $index->find( $query_string );
 sub find_entries {
   my $self = shift;
+  if ($self->is_batch) {
+    REST::Neo4p::NotSuppException->throw("find_entries method not supported in batch mode (yet)");
+  }
   my ($key, $value) = @_;
   my ($query) = @_;
   my $decoded_resp;
@@ -254,6 +266,8 @@ In the first form, an exact match is sought. In the second (i.e., when
 a single string argument is passed), the argument is interpreted as a
 query string and passed to the index as such. The Neo4j default is
 L<Lucene|http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/queryparsersyntax.html>.
+
+C<find_entries()> is not supported in batch mode.
 
 =back
 

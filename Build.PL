@@ -1,4 +1,4 @@
-#$Id: Build.PL 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Build.PL 17684 2012-09-23 01:12:42Z jensenma $
 use Module::Build;
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ my $build =  Module::Build->new
 	'JSON' => 2.0,
 	'JSON::Streaming::Reader' => 0.05,
 	'URI::Escape' => 3.3,
-	'LWP' => 0,
+	'LWP::UserAgent' => 6.04,
 	'Exception::Class' => 1.3
        },
       configure_requires => {
@@ -22,7 +22,8 @@ my $build =  Module::Build->new
       build_requires => {
 	'Module::Build' => 0,
 	'Test::More' => 0,
-	'Test::Exception' => 0
+	'Test::Exception' => 0,
+	'List::MoreUtils' => 0
        },
        build_recommends => {
 	 'Test::Pod' => 1.0

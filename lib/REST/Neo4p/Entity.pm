@@ -1,4 +1,4 @@
-#$Id: Entity.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Entity.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -42,8 +42,11 @@ sub new {
   elsif ($@) {
     ref $@ ? $@->rethrow : die $@;
   }
-  $decoded_resp->{self} ||= $agent->location;
-  return $class->new_from_json_response($decoded_resp);
+
+  $decoded_resp->{self} ||= $agent->location if ref $decoded_resp;
+  return ref($decoded_resp) ?
+    $class->new_from_json_response($decoded_resp) :
+      $class->new_from_batch_response($decoded_resp, @$url_components);
 }
 
 sub new_from_json_response {
@@ -80,6 +83,22 @@ sub new_from_json_response {
     for (keys %$props) { $self->_create_accessors($_) unless $self->can($_); }
   }
   return $ENTITY_TABLE->{$entity_type}{$obj}{self};
+}
+
+sub new_from_batch_response {
+  my $class = shift;
+  my ($entity_type) = $class =~ /.*::(.*)/;
+  $entity_type = lc $entity_type;
+  if ($entity_type eq 'entity') {
+    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly");
+  }
+  my ($id_token) = (@_);
+  $ENTITY_TABLE->{$entity_type}{$id_token}{entity_type} = $entity_type;
+  $ENTITY_TABLE->{$entity_type}{$id_token}{self} = bless \$id_token, $class;
+  $ENTITY_TABLE->{$entity_type}{$id_token}{self_url} = $id_token;
+  $ENTITY_TABLE->{$entity_type}{$id_token}{batch} = 1;
+  $ENTITY_TABLE->{batch_objs}->{$id_token} =  $ENTITY_TABLE->{$entity_type}{$id_token}{self};
+  return $ENTITY_TABLE->{$entity_type}{$id_token}{self};
 }
 
 # remove() - delete the node and destroy the object
@@ -214,7 +233,7 @@ sub remove_property {
 }
 
 sub id { ${$_[0]} }
-
+sub is_batch { shift->_entry->{batch} }
 sub entity_type { shift->_entry->{entity_type} }
 
 # $obj = REST::Neo4p::Entity->_entity_by_id($entity_type, $id[, $idx_type]) or
@@ -284,6 +303,7 @@ sub _get_url_suffix {
   my ($action) = @_;
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
+  return unless $ENTITY_TABLE->{$entity_type}{_actions};
   my $suffix = $ENTITY_TABLE->{$entity_type}{_actions}{$action};
 }
 

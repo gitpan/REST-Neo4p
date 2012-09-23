@@ -3,13 +3,14 @@ abstract: 'Perl bindings for a Neo4j graph database'
 author:
   - 'Mark A. Jensen'
 build_requires:
+  List::MoreUtils: 0
   Module::Build: 0
   Test::Exception: 0
   Test::More: 0
 configure_requires:
   Module::Build: 0
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4, CPAN::Meta::Converter version 2.120630'
+generated_by: 'Module::Build version 0.4001, CPAN::Meta::Converter version 2.112150'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -18,9 +19,12 @@ name: REST-Neo4p
 provides:
   REST::Neo4p:
     file: lib/REST/Neo4p.pm
-    version: 0.1251
+    version: 0.126
   REST::Neo4p::Agent:
     file: lib/REST/Neo4p/Agent.pm
+    version: 0.126
+  REST::Neo4p::Batch:
+    file: lib/REST/Neo4p/Batch.pm
     version: 0.1
   REST::Neo4p::Entity:
     file: lib/REST/Neo4p/Entity.pm
@@ -47,8 +51,8 @@ requires:
   Exception::Class: 1.3
   JSON: 2
   JSON::Streaming::Reader: 0.05
-  LWP: 0
+  LWP::UserAgent: 6.04
   URI::Escape: 3.3
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.1251
+version: 0.126

@@ -1,4 +1,4 @@
-#$Id: Query.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Query.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
@@ -34,7 +34,10 @@ sub new {
 sub execute {
   my $self = shift;
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4j::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  if ($agent->batch_mode) {
+    REST::Neo4p::NotSuppException->throw('Query execution not supported in batch mode (yet)');
+  }
   $self->{_error} = undef;
   $self->{_decoded_resp} = undef;
   $self->{NAME} = undef;
@@ -250,7 +253,7 @@ Create a new query object. First argument is the Cypher query
 
  $numrows = $query->execute;
 
-Execute the query on the server.
+Execute the query on the server. Not supported in batch mode.
 
 =item fetch(), fetchrow_arrayref()
 

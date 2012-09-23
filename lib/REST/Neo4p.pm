@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id$
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.1251';
+  $REST::Neo4p::VERSION = '0.126';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -45,6 +45,7 @@ sub get_node_by_id {
   my $class = shift;
   my ($id) = @_;
   my $node;
+  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
   eval {
     $node = REST::Neo4p::Node->_entity_by_id($id);
   };
@@ -64,6 +65,7 @@ sub get_relationship_by_id {
   my $class = shift;
   my ($id) = @_;
   my $relationship;
+  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
   eval {
     $relationship = REST::Neo4p::Relationship->_entity_by_id($id);
   };
@@ -81,7 +83,13 @@ sub get_relationship_by_id {
 sub get_index_by_name {
   my $class = shift;
   my ($name, $type) = @_;
+  if (grep /^$name$/, qw(node relationship)) {
+    my $a = $name;
+    $name = $type;
+    $type = $a;
+  }
   my $idx;
+  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
   eval {
     $idx = REST::Neo4p::Index->_entity_by_id($name,$type);
   };
@@ -168,6 +176,22 @@ REST::Neo4p - Perl object bindings for a Neo4j database
   $path = $query->fetch->[0];
   @path_nodes = $path->nodes;
   @path_rels = $path->relationships;
+
+Batch processing (see L<REST::Neo4p::Batch> for more)
+
+ #!perl
+ # loader...
+ use REST::Neo4p;
+ use REST::Neo4p::Batch;
+ 
+ open $f, shift() or die $!;
+ batch {
+   while (<>) {
+    chomp;
+    ($name, $value) = split /\t/;
+    REST::Neo4p::Node->new({name => $name, value => $value});
+   } 'discard_objs';
+ exit(0);
 
 =head1 DESCRIPTION
 

@@ -27,3 +27,6 @@ Revision history for Perl module TCGA::Neo4j
       there by the fetch() iterator
 0.1251
     - Pod fixes (thanks Mat)
+0.126
+    - LWP::UserAgent v6.04 or greater required
+    - Batch feature implemented, new tests (008, 009)

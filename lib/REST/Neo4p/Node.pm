@@ -1,4 +1,4 @@
-#$Id: Node.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Node.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -21,7 +21,8 @@ sub relate_to {
   my $self = shift;
   my ($target_node, $rel_type, $rel_props) = @_;
   my $agent = $REST::Neo4p::AGENT;
-  my $suffix = $self->_get_url_suffix('create_relationship');
+  my $suffix = $self->_get_url_suffix('create_relationship')
+    || 'relationships'; # weak workaround
   my $content = {
 		 'to' => $target_node->_self_url,
 		 'type' => $rel_type
@@ -31,7 +32,7 @@ sub relate_to {
   }
   my $decoded_resp;
   eval {
-    $decoded_resp = $agent->post_data(['node',$$self,$suffix],
+    $decoded_resp = $agent->post_node([$$self,$suffix],
 				      $content);
   };
   my $e;
@@ -42,7 +43,9 @@ sub relate_to {
   elsif ($@) {
     ref $@ ? $@->rethrow : die $@;
   }
-  return REST::Neo4p::Relationship->new_from_json_response($decoded_resp);
+  return ref($decoded_resp) ? 
+    REST::Neo4p::Relationship->new_from_json_response($decoded_resp) :
+	REST::Neo4p::Relationship->new_from_batch_response($decoded_resp);
 }
 
 sub get_relationships {
@@ -70,7 +73,7 @@ sub get_relationships {
   }
   my $decoded_resp;
   eval { 
-    $decoded_resp = $agent->get_data( 'node',$$self,$self->_get_url_suffix($action) );
+    $decoded_resp = $agent->get_node($$self,$self->_get_url_suffix($action) );
   };
   my $e;
   if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
@@ -85,7 +88,9 @@ sub get_relationships {
     $decoded_resp = [$decoded_resp];
   }
   for (@$decoded_resp) {
-    push @ret, REST::Neo4p::Relationship->new_from_json_response($_);
+    push @ret, ref($_) ? 
+      REST::Neo4p::Relationship->new_from_json_response($_) :
+	  REST::Neo4p::Relationship->new_from_batch_response($_);
   }
   return @ret;
 }

@@ -1,4 +1,4 @@
-#$Id: Exceptions.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Exceptions.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Exceptions;
 BEGIN {
   $REST::Neo4p::Exceptions::VERSION = '0.1';
@@ -51,7 +51,6 @@ use Exception::Class (
     isa => 'REST::Neo4p::LocalException',
     description => 'Problem parsing the response to a cypher query (prob. a bug)'
    }
-      
    );
 
 1;

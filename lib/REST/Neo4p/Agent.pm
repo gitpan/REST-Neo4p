@@ -1,17 +1,19 @@
-#$Id: Agent.pm 17665 2012-09-12 04:01:50Z jensenma $
+#$Id: Agent.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
+use File::Temp qw(tempfile);
 use JSON;
 use Carp qw(croak carp);
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.1';
+  $REST::Neo4p::Agent::VERSION = '0.126';
 }
 
 our $AUTOLOAD;
+our $JOB_CHUNK = 1024;
 our $JSON = JSON->new()->allow_nonref(1);
 
 sub new {
@@ -26,14 +28,26 @@ sub new {
 
 sub server {
   my $self = shift;
-  $self->{_server} = shift if @_;
-  return $self->{_server};
+  $self->{__server} = shift if @_;
+  return $self->{__server};
+}
+
+sub batch_mode {
+  my $self = shift;
+  $self->{__batch_mode} = shift if @_;
+  return $self->{__batch_mode};
+}
+
+sub batch_length{ 
+  my $self = shift;
+  REST::Neo4p::LocalException->throw("Agent not in batch mode") unless $self->batch_mode;
+  $self->{__batch_length}
 }
 
 sub connect {
   my $self = shift;
   my ($server) = @_;
-  $self->{_server} = $server if defined $server;
+  $self->{__server} = $server if defined $server;
   unless ($self->server) {
     REST::Neo4p::Exception->throw(message => 'Server not set');
    }
@@ -41,7 +55,6 @@ sub connect {
   unless ($resp->is_success) {
     REST::Neo4p::CommException->throw( code => $resp->code,
 				       message => $resp->message );
-    
   }
   my $json =  $JSON->decode($resp->content);
   # add the discovered URLs to the object hash, keyed by 
@@ -70,6 +83,56 @@ sub connect {
 
   return 1;
 }
+
+# _add_to_batch_queue
+# takes a request and converts to a Neo4j REST batch-friendly
+# hash
+# VERY internal and experimental
+# $url : rest endpoint that would be called ordinarily
+# $rq : [get|delete|post|put]
+# $content : hashref of rq content (post and put)
+# $headers : hashref of additional headers
+sub _add_to_batch_queue {
+  my $self = shift;
+  my ($url, $rq, $content, $headers) = @_;
+  my $data = $self->data;
+  $url =~ s|$data||; # get suffix
+  my $id = ++($self->{__batch_length}||=$self->{__batch_length});
+  my $job = { 
+      method => uc $rq,
+      to => $url,
+      id => $id
+     };
+  $job->{body} = $content if defined $content;
+  push @{$self->{__batch_queue}}, $job;
+  return "{$id}"; # Neo4j batch reference for this job
+}
+
+sub execute_batch {
+  my $self = shift;
+  my ($chunk_size) = @_;
+  unless ($self->batch_mode) {
+    REST::Neo4p::LocalException->throw("Agent not in batch mode; can't execute batch");
+  }
+  return unless ($self->batch_length);
+  my ($tfh, $tfname) = tempfile;
+  $self->batch_mode(0);
+  my @chunk;
+  if ($chunk_size) {
+    @chunk = splice @{$self->{__batch_queue}}, 0, $chunk_size;
+    $self->{__batch_length} -= @chunk;
+  }
+  else {
+    @chunk = @{$self->{__batch_queue}};
+    undef $self->{__batch_queue};
+    $self->{__batch_length} = 0;
+  }
+  $self->post_batch([],\@chunk, {':content_file' => $tfname});
+  $self->batch_mode(1);
+  return $tfname;
+}
+
+sub execute_batch_chunk { shift->execute_batch($JOB_CHUNK) }
 
 # contains a reference to the returned content, as decoded by JSON
 sub decoded_content { shift->{_decoded_content} }
@@ -117,7 +180,15 @@ sub AUTOLOAD {
       if (@url_components && ref $url_components[-1] && (ref $url_components[-1] eq 'HASH')) {
 	%rest_params = %{ pop @url_components };
       }
-      my $resp = $self->$rq(join('/',$self->{_actions}{$action}, @url_components),%rest_params);
+      my $url = join('/',$self->{_actions}{$action},@url_components);
+      if ($self->batch_mode) {
+	$url = ($url_components[0] =~ /{[0-9]+}/) ? $url_components[0] : $url; # index batch object kludge
+	@_ = ($self, 
+	      $url,
+	      $rq);
+	goto &_add_to_batch_queue; # short circuit to _add_to_batch_queue
+      }
+      my $resp = $self->$rq($url,%rest_params);
       eval { 
 	$self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
       };
@@ -144,11 +215,19 @@ sub AUTOLOAD {
     };
     /post|put/ && do {
       my ($url_components, $content, $addl_headers) = @_;
-      $content = $JSON->encode($content) if $content;
       unless (!$addl_headers || (ref $addl_headers eq 'HASH')) {
 	REST::Neo4p::LocalException->throw('Arg 3 must be a hashref of additional headers');
       }
-      my $resp  = $self->$rq(join('/',$self->{_actions}{$action},@$url_components), 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
+      my $url = join('/',$self->{_actions}{$action},@$url_components);
+      if ($self->batch_mode) {
+	$url = ($url_components->[0] =~ /{[0-9]+}/) ? join('/',@$url_components) : $url; # index batch object kludge
+	@_ = ($self, 
+	      $url,
+	      $rq, $content, $addl_headers);
+	goto &_add_to_batch_queue;
+      }
+      $content = $JSON->encode($content) if $content;
+      my $resp  = $self->$rq($url, 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
       $self->{_decoded_content} = $resp->content ? $JSON->decode($resp->content) : {};
       unless ($resp->is_success) {
 	if ( $self->{_decoded_content} ) {
@@ -231,6 +310,7 @@ and added back with
 
  $agent->stream
 
+For batch API experimental features, see L</Batch Mode>.
 
 =head1 METHODS
 
@@ -369,6 +449,63 @@ Removes C<X-Stream: true> from the default headers.
  $agent->stream;
 
 Adds C<X-Stream: true> to the default headers.
+
+=back
+
+=head1 Batch Mode
+
+When the agent is in batch mode, the usual request calls are not
+executed immediately, but added to a queue. The L</execute_batch()>
+method sends the queued calls in the format required by the Neo4p REST
+API (using the C<post_batch> method outside of batch
+mode). L</execute_batch()> returns the decoded json server response in
+the return format specified by the Neo4p REST batch API.
+
+=over
+
+=item batch_mode()
+
+ print ($agent->batch_mode ? "I am " : "I am not ")." in batch mode\n";
+ $agent->batch_mode(1);
+
+Set/get current agent mode.
+
+=item batch_length()
+
+ if ($agent->batch_length() > $JOB_LIMIT) {
+   print "Queue getting long; better execute\n"
+ }
+
+Returns current queue length. Throws C<REST::Neo4p::LocalException> if 
+agent not in batch mode.
+
+=item execute_batch()
+
+ $tempfile_name = $agent->execute_batch();
+
+ while (my $tmpf = $agent->execute_batch(50)) {
+   # handle responses
+ }
+
+Processes the queued calls and returns the decoded json response from
+server in a temporary file. Returns with undef if batch length is zero.
+Throws C<REST::Neo4p::LocalException> if not in batch mode.
+
+Second form takes an integer argument; this will submit the next [integer]
+jobs and return the server response in the tempfile. The batch length is
+updated.
+
+You are responsible for unlinking the tempfile.
+
+=item execute_batch_chunk()
+
+ while (my $tmpf = $agent->execute_batch_chunk ) {
+  # handle response
+ }
+
+Convenience form of
+C<execute_batch($REST::Neo4p::JOB_CHUNK)>. C<$REST::Neo4p::JOB_CHUNK>
+has default value of 1024.
 
 =back
 

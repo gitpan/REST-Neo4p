@@ -7,6 +7,7 @@ Build.PL
 Makefile.PL
 lib/REST/Neo4p.pm
 lib/REST/Neo4p/Agent.pm
+lib/REST/Neo4p/Batch.pm
 lib/REST/Neo4p/Entity.pm
 lib/REST/Neo4p/Exceptions.pm
 lib/REST/Neo4p/Index.pm
@@ -21,6 +22,9 @@ t/004_idx.t
 t/005_db.t
 t/006_query.t
 t/007_accessors.t
+t/008_batch_agent.t
+t/009_batch.t
+t/010_batch_synopsis.t
 t/098_pod.t
 t/099_error.t
 META.yml
