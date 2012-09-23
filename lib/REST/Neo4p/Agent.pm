@@ -489,7 +489,7 @@ agent not in batch mode.
 
 Processes the queued calls and returns the decoded json response from
 server in a temporary file. Returns with undef if batch length is zero.
-Throws C<REST::Neo4p::LocalException> if not in batch mode.
+Throws L<REST::Neo4p::Exceptions|REST::Neo4p::LocalException> if not in batch mode.
 
 Second form takes an integer argument; this will submit the next [integer]
 jobs and return the server response in the tempfile. The batch length is

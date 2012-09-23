@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.126';
+  $REST::Neo4p::VERSION = '0.1261';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -186,7 +186,7 @@ Batch processing (see L<REST::Neo4p::Batch> for more)
  
  open $f, shift() or die $!;
  batch {
-   while (<>) {
+   while (<$f>) {
     chomp;
     ($name, $value) = split /\t/;
     REST::Neo4p::Node->new({name => $name, value => $value});
@@ -290,7 +290,7 @@ for you to make; the default is I<no> auto-accessors.
 =head1 SEE ALSO
 
 L<REST::Neo4p::Node>,L<REST::Neo4p::Relationship>,L<REST::Neo4p::Index>,
-L<REST::Neo4p::Query>, L<REST::Neo4p::Path>
+L<REST::Neo4p::Query>, L<REST::Neo4p::Path>, L<REST::Neo4p::Batch>
 
 =head1 AUTHOR
 
