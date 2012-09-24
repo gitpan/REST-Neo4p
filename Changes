@@ -30,3 +30,7 @@ Revision history for Perl module TCGA::Neo4j
 0.126
     - LWP::UserAgent v6.04 or greater required
     - Batch feature implemented, new tests (008, 009)
+0.1261
+    - Pod fixes
+0.1262
+    - Added REST::Neo4p::Exceptions pod
