@@ -40,7 +40,7 @@
    "provides" : {
       "REST::Neo4p" : {
          "file" : "lib/REST/Neo4p.pm",
-         "version" : "0.1262"
+         "version" : "0.127"
       },
       "REST::Neo4p::Agent" : {
          "file" : "lib/REST/Neo4p/Agent.pm",
@@ -85,5 +85,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.1262"
+   "version" : "0.127"
 }

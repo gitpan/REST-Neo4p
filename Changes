@@ -34,3 +34,5 @@ Revision history for Perl module TCGA::Neo4j
     - Pod fixes
 0.1262
     - Added REST::Neo4p::Exceptions pod
+0.127
+    - Added start_node(), end_node() to Relationship object (thanks Joseph)

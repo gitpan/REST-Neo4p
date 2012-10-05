@@ -1,6 +1,6 @@
 #-*-perl-*-
 #$Id: 003_objs.t 17650 2012-08-31 03:41:43Z jensenma $
-use Test::More tests => 29;
+use Test::More tests => 35;
 use Module::Build;
 use lib '../lib';
 use strict;
@@ -13,7 +13,7 @@ eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 28;
+my $num_live_tests = 34;
 
 
 use_ok('REST::Neo4p');
@@ -58,6 +58,14 @@ SKIP : {
     ok @relns = $node1->get_relationships('out'), 'get outgoing relationships';
     is ${$relns[0]}, $$rel12, 'got outgoing reln';
 
+    # start_node, end_node (0.127)
+    isa_ok($rel21->start_node, 'REST::Neo4p::Node');
+    isa_ok($rel21->end_node, 'REST::Neo4p::Node');
+    is $rel21->start_node->id, $node2->id, 'got start node';
+    is $rel21->end_node->id, $node1->id, 'got end node';
+    is $rel12->start_node->id, $node1->id, 'got start node';
+    is $rel12->end_node->id, $node2->id, 'got end node';
+    
     CLEANUP : {    
 	ok $rel12->remove, 'remove relationship n1 to n2';
 	ok $rel21->remove, 'remove relationship n2 to n1';

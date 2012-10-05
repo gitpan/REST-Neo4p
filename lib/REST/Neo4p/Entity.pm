@@ -68,6 +68,11 @@ sub new_from_json_response {
   my $self_url  = $decoded_resp->{self} || $decoded_resp->{template};
   $self_url =~ s/{key}.*$//; # another kludge for get_indexes
   my ($obj) = $self_url =~ /([0-9]+|[a-z_]+)\/?$/i;
+  my ($start_id,$end_id);
+  if ($decoded_resp->{start}) {
+    ($start_id) = $decoded_resp->{start} =~ /([0-9]+)\/?$/;
+    ($end_id) = $decoded_resp->{end} =~ /([0-9]+)\/?$/;
+  }
   unless (defined $ENTITY_TABLE->{$entity_type}{$obj}) {
     if ($decoded_resp->{template}) {     # another kludge for get_indexes
       ($decoded_resp->{type}) = $decoded_resp->{template} =~ m|index/([a-z]+)/|;
@@ -75,6 +80,8 @@ sub new_from_json_response {
     $ENTITY_TABLE->{$entity_type}{$obj}{entity_type} = $entity_type;
     $ENTITY_TABLE->{$entity_type}{$obj}{self} = bless \$obj, $class;
     $ENTITY_TABLE->{$entity_type}{$obj}{self_url} = $self_url;
+    $ENTITY_TABLE->{$entity_type}{$obj}{start_id} = $start_id;
+    $ENTITY_TABLE->{$entity_type}{$obj}{end_id} = $end_id;
     $ENTITY_TABLE->{$entity_type}{$obj}{type} = $decoded_resp->{type};
   }
   if ($REST::Neo4p::CREATE_AUTO_ACCESSORS && ($entity_type ne 'index')) {

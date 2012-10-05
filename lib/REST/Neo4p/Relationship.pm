@@ -1,7 +1,7 @@
 #$Id: Relationship.pm 17677 2012-09-19 23:32:48Z jensenma $
 package REST::Neo4p::Relationship;
 use base 'REST::Neo4p::Entity';
-use REST::Neo4p::Exceptions;
+use REST::Neo4p;
 use Carp qw(croak carp);
 use strict;
 use warnings;
@@ -23,6 +23,14 @@ sub new {
 sub type {
   my $self = shift;
   return $self->_entry->{type};
+}
+
+sub start_node {
+  return REST::Neo4p->get_node_by_id(shift->_entry->{start_id});
+}
+
+sub end_node {
+  return REST::Neo4p->get_node_by_id(shift->_entry->{end_id});
 }
 
 =head1 NAME
@@ -72,6 +80,13 @@ Sets values of properties on nodes and relationships.
  print "'Sup, Al." if ($props->{name} eq 'Al');
 
 Get all the properties of a node or relationship as a hashref.
+
+=item start_node(), end_node()
+
+ $fred_node = $married_to->start_node;
+ $wilma_node = $married_to->end_node;
+
+Get the start and end nodes of the relationship.
 
 =item type()
 
