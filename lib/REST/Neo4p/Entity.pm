@@ -67,7 +67,7 @@ sub new_from_json_response {
   # "template" in next line is a kludge for get_indexes
   my $self_url  = $decoded_resp->{self} || $decoded_resp->{template};
   $self_url =~ s/{key}.*$//; # another kludge for get_indexes
-  my ($obj) = $self_url =~ /([0-9]+|[a-z_]+)\/?$/i;
+  my ($obj) = $self_url =~ /([a-z0-9_]+)\/?$/i;
   my ($start_id,$end_id);
   if ($decoded_resp->{start}) {
     ($start_id) = $decoded_resp->{start} =~ /([0-9]+)\/?$/;
