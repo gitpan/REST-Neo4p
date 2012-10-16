@@ -6,7 +6,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Relationship::VERSION = '0.1';
+  $REST::Neo4p::Relationship::VERSION = '0.1282';
 }
 
 sub new {
@@ -15,7 +15,7 @@ sub new {
   unless (ref $from_node && $from_node->is_a('REST::Neo4p::Node') &&
 	  ref $to_node && $to_node->is_a('REST::Neo4p::Node') &&
 	  defined $type) {
-    REST::Neo4p::LocalException->throw("Requires 2 REST::Neo4p::Node objects and a relationship type");
+    REST::Neo4p::LocalException->throw("Requires 2 REST::Neo4p::Node objects and a relationship type\n");
   }
   return $from_node->relate_to($to_node, $type);
 }

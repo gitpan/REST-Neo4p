@@ -38,3 +38,7 @@ Revision history for Perl module TCGA::Neo4j
     - Added start_node(), end_node() to Relationship object (thanks Joseph)
 0.128
     - fixed rt80150 (thanks Joseph)
+0.1282
+    - fixed rt80196 (thanks Sergei)
+    - added newlines to all exception messages
+    - updated $VERSION for all modules

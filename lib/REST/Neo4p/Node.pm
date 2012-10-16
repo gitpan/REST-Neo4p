@@ -8,7 +8,7 @@ use base 'REST::Neo4p::Entity';
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.1';
+  $REST::Neo4p::Node::VERSION = '0.1282';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -68,7 +68,7 @@ sub get_relationships {
       last;
     };
     do { # huh?
-      REST::Neo4p::LocalException->throw("Got '$direction' for relationship direction; expected [in|out|all]");
+      REST::Neo4p::LocalException->throw("Got '$direction' for relationship direction; expected [in|out|all]\n");
     };
   }
   my $decoded_resp;
@@ -101,7 +101,7 @@ sub get_all_relationships { shift->get_relationships('all',@_) }
 
 sub get_typed_relationships {
   my $self = shift;
-  REST::Neo4p::NotImplException->throw( 'not implemented yet' );
+  REST::Neo4p::NotImplException->throw( "get_typed_relationships() not implemented yet\n" );
 }
 
 =head1 NAME

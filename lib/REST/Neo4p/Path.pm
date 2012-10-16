@@ -5,7 +5,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Path::VERSION = '0.1';
+  $REST::Neo4p::Path::VERSION = '0.1282';
 }
 
 sub new {
@@ -16,7 +16,7 @@ sub new {
 sub new_from_json_response {
   my $class = shift;
   my ($decoded_resp) = @_;
-  REST::Neo4p::LocalException->throw('Arg does not describe a Neo4j path response') unless $decoded_resp->{start} && $decoded_resp->{end} && $decoded_resp->{relationships} && $decoded_resp->{nodes};
+  REST::Neo4p::LocalException->throw("Arg does not describe a Neo4j path response\n") unless $decoded_resp->{start} && $decoded_resp->{end} && $decoded_resp->{relationships} && $decoded_resp->{nodes};
   my $obj = bless {}, $class;
   $obj->{_length} = $decoded_resp->{length};
   my @node_urls = @{$decoded_resp->{nodes}};
@@ -50,7 +50,7 @@ sub new_from_json_response {
     }
     push @{$obj->{_relationships}}, $relationship;
   }
-  REST::Neo4p::LocalException->throw('Extra relationships in path') if @reln_urls;
+  REST::Neo4p::LocalException->throw("Extra relationships in path\n") if @reln_urls;
   return $obj;
 }
 

@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Batch::VERSION = '0.1';
+  $REST::Neo4p::Batch::VERSION = '0.1282';
 }
 
 our @EXPORT = qw(batch);
@@ -18,7 +18,7 @@ sub batch (&@) {
   my ($coderef,$action) = @_;
   my $agent = $REST::Neo4p::AGENT;
   my @errors;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   warn 'Agent already in batch_mode on batch() call' if ($agent->batch_mode);
   $agent->batch_mode(1);
   $coderef->();
@@ -62,7 +62,7 @@ sub _scan_for_errors {
 	  };
 	  /start_object/ && do {
 	    unless ($in_response) {
-	      REST::Neo4p::LocalException->throw("Unexpected token in server batch response");
+	      REST::Neo4p::LocalException->throw("Unexpected token in server batch response\n");
 	    }
 	    my $obj = $jsonr->slurp;
 	    if ($obj->{status} !~ m/^2../) {
@@ -101,7 +101,7 @@ sub _process_objs {
 	  };
 	  /start_object/ && do {
 	    unless ($in_response) {
-	      REST::Neo4p::LocalException->throw("Unexpected token in server batch response");
+	      REST::Neo4p::LocalException->throw("Unexpected token in server batch response\n");
 	    }
 	    _register_object($jsonr->slurp);
 	    last;

@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.1';
+  $REST::Neo4p::Index::VERSION = '0.1282';
 }
 
 # TODO: auto index objects ready-made
@@ -27,7 +27,7 @@ sub new {
     $index_type = $a;
   }
   unless (grep /^$index_type$/,qw(node relationship)) {
-    REST::Neo4p::LocalException->throw("Index type must be either node or relationship");
+    REST::Neo4p::LocalException->throw("Index type must be either node or relationship\n");
   }
   my $properties = {
 		    _addl_components => [$index_type],
@@ -67,11 +67,11 @@ sub add_entry {
   my ($entity, $key, $value) = @_;
   unless ($self->type eq $entity->entity_type) {
     REST::Neo4p::LocalException->throw(
-      "Can't add a ".$entity->entity_type." to a ".$self->type." index"
+      "Can't add a ".$entity->entity_type." to a ".$self->type." index\n"
      );
   }
   unless (defined $key && defined $value) {
-    REST::Neo4p::LocalException->throw("Both key and value must be supplied to add an entry");
+    REST::Neo4p::LocalException->throw("Both key and value must be supplied to add an entry\n");
   }
   my $agent = $REST::Neo4p::AGENT;
   my $rq = "post_".$self->_action;
@@ -100,7 +100,7 @@ sub remove_entry {
   my ($entity, $key, $value) = @_;
   unless ($self->type eq $entity->entity_type) {
     REST::Neo4p::LocalException->throw(
-      "Can't modify a ".$self->type." index by referring to a  ".$entity->entity_type
+      "Can't modify a ".$self->type." index by referring to a  ".$entity->entity_type."\n"
      );
   }
   my @addl_components;
@@ -134,7 +134,7 @@ sub remove_entry {
 sub find_entries {
   my $self = shift;
   if ($self->is_batch) {
-    REST::Neo4p::NotSuppException->throw("find_entries method not supported in batch mode (yet)");
+    REST::Neo4p::NotSuppException->throw("find_entries method not supported in batch mode (yet)\n");
   }
   my ($key, $value) = @_;
   my ($query) = @_;
@@ -195,7 +195,7 @@ sub get_properties { not_supported() }
 sub remove_property { not_supported() }
 
 sub not_supported {
-  REST::Neo4p::NotSuppException->throw( __PACKAGE__." does not support this method" );
+  REST::Neo4p::NotSuppException->throw( __PACKAGE__." does not support this method\n" );
 }
 
 =head1 NAME

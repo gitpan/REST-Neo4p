@@ -25,7 +25,7 @@ my $build =  Module::Build->new
 	'Test::Exception' => 0,
 	'List::MoreUtils' => 0
        },
-       build_recommends => {
+      build_recommends => {
 	 'Test::Pod' => 1.0
 	}
       

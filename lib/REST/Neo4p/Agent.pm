@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.126';
+  $REST::Neo4p::Agent::VERSION = '0.1282';
 }
 
 our $AUTOLOAD;
@@ -40,7 +40,7 @@ sub batch_mode {
 
 sub batch_length{ 
   my $self = shift;
-  REST::Neo4p::LocalException->throw("Agent not in batch mode") unless $self->batch_mode;
+  REST::Neo4p::LocalException->throw("Agent not in batch mode\n") unless $self->batch_mode;
   $self->{__batch_length}
 }
 
@@ -49,7 +49,7 @@ sub connect {
   my ($server) = @_;
   $self->{__server} = $server if defined $server;
   unless ($self->server) {
-    REST::Neo4p::Exception->throw(message => 'Server not set');
+    REST::Neo4p::Exception->throw("Server not set\n");
    }
   my $resp = $self->get($self->server);
   unless ($resp->is_success) {
@@ -68,7 +68,7 @@ sub connect {
   $resp = $self->get($self->{_actions}{data});
   unless ($resp->is_success) {
     REST::Neo4p::CommException->throw( code => $resp->code,
-				       message => $resp->message." (connect phase 2)" );
+				       message => $resp->message." (connect phase 2)\n" );
   }
   $json = $JSON->decode($resp->content);
   foreach (keys %{$json}) {
@@ -112,7 +112,7 @@ sub execute_batch {
   my $self = shift;
   my ($chunk_size) = @_;
   unless ($self->batch_mode) {
-    REST::Neo4p::LocalException->throw("Agent not in batch mode; can't execute batch");
+    REST::Neo4p::LocalException->throw("Agent not in batch mode; can't execute batch\n");
   }
   return unless ($self->batch_length);
   my ($tfh, $tfname) = tempfile;
@@ -166,7 +166,7 @@ sub AUTOLOAD {
   $method =~ s/.*:://;
   my ($rq, $action) = $method =~ /^(get_|post_|put_|delete_)*(.*)$/;
   unless (grep /^$action$/,keys %{$self->{_actions}}) {
-    REST::Neo4p::LocalException->throw( __PACKAGE__." does not define method '$method'" );
+    REST::Neo4p::LocalException->throw( __PACKAGE__." does not define method '$method'\n" );
   }
   return $self->{_actions}{$action} unless $rq;
   $rq =~ s/_$//;
@@ -216,7 +216,7 @@ sub AUTOLOAD {
     /post|put/ && do {
       my ($url_components, $content, $addl_headers) = @_;
       unless (!$addl_headers || (ref $addl_headers eq 'HASH')) {
-	REST::Neo4p::LocalException->throw('Arg 3 must be a hashref of additional headers');
+	REST::Neo4p::LocalException->throw("Arg 3 must be a hashref of additional headers\n");
       }
       my $url = join('/',$self->{_actions}{$action},@$url_components);
       if ($self->batch_mode) {

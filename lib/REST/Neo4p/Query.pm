@@ -8,7 +8,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Query::VERSION = '0.1';
+  $REST::Neo4p::Query::VERSION = '0.1282';
 }
 
 my $BUFSIZE = 4096;
@@ -17,10 +17,10 @@ sub new {
   my $class = shift;
   my ($q_string, $params) = @_;
   unless (defined $q_string and !ref $q_string) {
-    REST::Neo4p::LocalException->throw( "First argument must be the query string");
+    REST::Neo4p::LocalException->throw( "First argument must be the query string\n");
   }
   unless (!defined $params || ref($params) eq 'HASH') {
-    REST::Neo4p::LocalException->throw( "Second argment must be a hashref of query paramters" );
+    REST::Neo4p::LocalException->throw( "Second argment must be a hashref of query parameters\n" );
   }
   bless { '_query' => $q_string,
 	  '_params' => $params || {},
@@ -34,9 +34,9 @@ sub new {
 sub execute {
   my $self = shift;
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   if ($agent->batch_mode) {
-    REST::Neo4p::NotSuppException->throw('Query execution not supported in batch mode (yet)');
+    REST::Neo4p::NotSuppException->throw("Query execution not supported in batch mode (yet)\n");
   }
   $self->{_error} = undef;
   $self->{_decoded_resp} = undef;
@@ -73,7 +73,7 @@ sub execute {
     }
   }
   unless ($columns_elt) {
-    REST::Neo4p::LocalException->throw("Can't parse query reponse json (missing 'columns' element)");
+    REST::Neo4p::LocalException->throw("Can't parse query reponse json (missing 'columns' element)\n");
   }
   $self->{NAME} = $columns_elt;
   $self->{NUM_OF_FIELDS} = scalar @$columns_elt;
@@ -98,7 +98,7 @@ sub execute {
 	    }
       }
   unless ($cursor_set) {
-    REST::Neo4p::LocalException->throw("Can't parse query response (start of data array not found)");
+    REST::Neo4p::LocalException->throw("Can't parse query response (start of data array not found)\n");
   }
   $self->{_iterator} = 
     sub {
@@ -119,7 +119,7 @@ sub execute {
 	  return;
 	};
 	do { # fail
-	  REST::Neo4p::LocalException->throw("Can't parse query resonse (unexpected token looking for next row)");
+	  REST::Neo4p::LocalException->throw("Can't parse query resonse (unexpected token looking for next row)\n");
 	  last;
 	};
       }
@@ -143,11 +143,11 @@ sub execute {
 	    last;
 	  };
 	  /ARRAY/ && do {
-	    REST::Neo4p::LocalException->("Don't know what to do with arrays yet");
+	    REST::Neo4p::LocalException->throw("Don't know what to do with arrays yet\n");
 	    last;
 	  };
 	  do {
-	    REST::Neo4p::QueryResponseException->throw("Can't parse query response (row doesn't make sense)");
+	    REST::Neo4p::QueryResponseException->throw("Can't parse query response (row doesn't make sense)\n");
 	  };
 	}
       }
@@ -192,7 +192,7 @@ sub _response_entity {
 	last;
       };
       do {
-	REST::Neo4p::QueryResponseException->throw("Can't identify object type by JSON response");
+	REST::Neo4p::QueryResponseException->throw("Can't identify object type by JSON response\n");
       };
     }
   }
@@ -201,7 +201,7 @@ sub _response_entity {
     return 'Path';
   }
   else {
-    REST::Neo4p::QueryResponseException->throw("Can't identify object type by JSON response (2)");
+    REST::Neo4p::QueryResponseException->throw("Can't identify object type by JSON response (2)\n");
   }
 }
 

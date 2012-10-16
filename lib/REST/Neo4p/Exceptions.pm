@@ -1,7 +1,7 @@
 #$Id: Exceptions.pm 17684 2012-09-23 01:12:42Z jensenma $
 package REST::Neo4p::Exceptions;
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.1';
+  $REST::Neo4p::Exceptions::VERSION = '0.1282';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',

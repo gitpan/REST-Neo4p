@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.1281';
+  $REST::Neo4p::VERSION = '0.1282';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -23,7 +23,7 @@ our $AGENT;
 sub connect {
   my $class = shift;
   my ($server_address) = @_;
-  REST::Neo4p::LocalException->throw("Server address not set")  unless $server_address;
+  REST::Neo4p::LocalException->throw("Server address not set\n")  unless $server_address;
   eval {
     $AGENT = REST::Neo4p::Agent->new();
   };
@@ -45,7 +45,7 @@ sub get_node_by_id {
   my $class = shift;
   my ($id) = @_;
   my $node;
-  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   eval {
     $node = REST::Neo4p::Node->_entity_by_id($id);
   };
@@ -65,7 +65,7 @@ sub get_relationship_by_id {
   my $class = shift;
   my ($id) = @_;
   my $relationship;
-  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   eval {
     $relationship = REST::Neo4p::Relationship->_entity_by_id($id);
   };
@@ -89,7 +89,7 @@ sub get_index_by_name {
     $type = $a;
   }
   my $idx;
-  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   eval {
     $idx = REST::Neo4p::Index->_entity_by_id($name,$type);
   };
@@ -107,7 +107,7 @@ sub get_index_by_name {
 # @all_reln_types = REST::Neo4p->get_relationship_types
 sub get_relationship_types {
   my $class = shift;
-  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   my $decoded_json;
   eval {
     $decoded_json = $AGENT->get_relationship_types();
@@ -126,9 +126,9 @@ sub get_relationship_types {
 sub get_indexes {
   my $class = shift;
   my ($type) = @_;
-  REST::Neo4p::CommException->throw('Not connected') unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   unless ($type) {
-    REST::Neo4p::LocalException->throw('Type argument (node or relationship) required');
+    REST::Neo4p::LocalException->throw("Type argument (node or relationship) required\n");
   }
   my $decoded_resp;
   eval {

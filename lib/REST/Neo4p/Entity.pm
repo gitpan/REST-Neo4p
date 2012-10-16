@@ -8,7 +8,7 @@ use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.1';
+  $REST::Neo4p::Entity::VERSION = '0.1282';
 }
 
 our $ENTITY_TABLE = {};
@@ -22,12 +22,12 @@ sub new {
   my ($entity_type) = $class =~ /.*::(.*)/;
   $entity_type = lc $entity_type;
   if ($entity_type eq 'entity') {
-    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly");
+    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly\n");
   }
   my ($properties) = (@_);
   my $url_components = delete $properties->{_addl_components};
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   my $decoded_resp;
   eval {
     $decoded_resp = $agent->post_data([$entity_type,
@@ -54,9 +54,12 @@ sub new_from_json_response {
   my ($entity_type) = $class =~ /.*::(.*)/;
   $entity_type = lc $entity_type;
   if ($entity_type eq 'entity') {
-    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly");
+    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly\n");
   }
   my ($decoded_resp) = (@_);
+  unless (defined $decoded_resp) {
+    REST::Neo4p::LocalException->throw("new_from_json_response() called with undef argument\n");
+  }
   unless ($ENTITY_TABLE->{$entity_type}{_actions}) {
     # capture the url suffix patterns for the entity actions:
     for (keys %$decoded_resp) {
@@ -97,7 +100,7 @@ sub new_from_batch_response {
   my ($entity_type) = $class =~ /.*::(.*)/;
   $entity_type = lc $entity_type;
   if ($entity_type eq 'entity') {
-    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly");
+    REST::Neo4p::NotSuppException->throw("Cannot use ".__PACKAGE__." directly\n");
   }
   my ($id_token) = (@_);
   $ENTITY_TABLE->{$entity_type}{$id_token}{entity_type} = $entity_type;
@@ -134,7 +137,7 @@ sub remove {
 sub set_property {
   my $self = shift;
   my ($props) = @_;
-  REST::Neo4p::LocalException->throw('Arg must be a hashref') unless ref($props) && ref $props eq 'HASH';
+  REST::Neo4p::LocalException->throw("Arg must be a hashref\n") unless ref($props) && ref $props eq 'HASH';
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
@@ -169,7 +172,7 @@ sub get_property {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   my @ret;
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
@@ -196,7 +199,7 @@ sub get_properties {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   $suffix =~ s|/[^/]*$||; # strip the '{key}' placeholder
   my $decoded_resp;
@@ -221,7 +224,7 @@ sub remove_property {
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
   my $agent = $REST::Neo4p::AGENT;
-  REST::Neo4p::CommException->throw('Not connected') unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
   my $suffix = $self->_get_url_suffix('property');
   foreach (@props) {
     eval {
@@ -261,12 +264,12 @@ sub _entity_by_id {
     ($id,$idx_type) = @_;
   }
   if ($entity_type eq 'index' && !$idx_type) {
-    REST::Neo4p::LocalException->throw('Index requested, but index type not provided in last arg');
+    REST::Neo4p::LocalException->throw("Index requested, but index type not provided in last arg\n");
   }
   unless ($ENTITY_TABLE->{$entity_type}{$id}) {
     # not recorded as object yet
     my $agent = $REST::Neo4p::AGENT;
-    REST::Neo4p::CommException->throw('Not connected') unless $agent;
+    REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
     my ($rq, $decoded_resp);
     if ($entity_type eq 'index') {
       # get list of indexes and choose the one (if any) matching the 
@@ -284,6 +287,15 @@ sub _entity_by_id {
 	ref $@ ? $@->rethrow : die $@;
       }
       $decoded_resp = $decoded_resp->{$id};
+      unless (defined $decoded_resp) {
+	REST::Neo4p::NotFoundException->throw
+	  (
+	   message => "Index '$id' not found in db\n",
+	   neo4j_message => "Neo4j call was successful, but index '$id'".
+	                     "was not returned in the list of indexes\n"
+	  );
+
+      }
     }
     else {
       # usual way to get entities...
