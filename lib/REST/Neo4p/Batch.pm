@@ -258,7 +258,7 @@ For example, this works:
 but this does not:
 
  my $idx = REST::Neo4p::Index->new('node' => 'pals_of_bob');
- my $name = 'fred'
+ my $name = 'fred';
  batch {
   my $node = REST::Neo4p::Node->new({name => $name});
   $idx->add_entry($node, name => $node->get_property('name'));

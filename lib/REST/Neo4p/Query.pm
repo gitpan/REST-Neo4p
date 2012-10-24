@@ -8,7 +8,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Query::VERSION = '0.1282';
+  $REST::Neo4p::Query::VERSION = '0.1283';
 }
 
 my $BUFSIZE = 4096;
@@ -65,20 +65,71 @@ sub execute {
   my $columns_elt;
   my $buf;
   my $jsonr = JSON::Streaming::Reader->for_stream($temp_fh);
-
+  # count items and reset
   while ( my $ret = $jsonr->get_token ) {
     if ($$ret[0] eq 'start_property' && $$ret[1] eq 'columns') {
       $columns_elt = $jsonr->slurp;
       last;
     }
-  }
+  } 
   unless ($columns_elt) {
     REST::Neo4p::LocalException->throw("Can't parse query reponse json (missing 'columns' element)\n");
+  }
+  my $row_count = 0;
+  my $in_data;
+  while ( my $ret = $jsonr->get_token ) {
+    my ($token_type, @data) = @$ret;
+    for ($token_type) {
+      /start_property/ && do {
+        if ($data[0] && $data[0] eq 'data') {
+	  $in_data = 1;
+	}
+	else {
+	  REST::Neo4p::LocalException->throw("Can't parse query response (data token not found)\n");
+	}
+	last;
+      };
+      /start_array/ && do {
+	if ($in_data) {
+	  # count rows
+	  while ( $ret = $jsonr->get_token ) {
+	    ($token_type, @data) = @$ret;
+	    if ($token_type eq 'start_array') {
+	      $row_count++;
+	      $jsonr->skip;
+	    }
+	    elsif ( $token_type eq 'end_array' ) { # end of the data array
+	      # we're done
+	      1;
+	    }
+	    else {
+#	      REST::Neo4p::LocalException->throw("Can't parse query response (array representing data row expected and not found)\n");
+	      1;
+	    }
+	  }
+	}
+	else {
+	  REST::Neo4p::LocalException->throw("Can't parse query response (start of data array not found)\n");
+	}
+	last;
+      };
+      do {
+	die "Why am I here?";
+      };
+    }
+  }
+  seek $temp_fh, 0, 0;
+  $jsonr = JSON::Streaming::Reader->for_stream($temp_fh);
+  while ( my $ret = $jsonr->get_token ) {
+    if ($$ret[0] eq 'start_property' && $$ret[1] eq 'columns') {
+      $jsonr->skip;
+      last;
+    }
   }
   $self->{NAME} = $columns_elt;
   $self->{NUM_OF_FIELDS} = scalar @$columns_elt;
   # position parser cursor
-  my $in_data;
+  undef $in_data;
   my $cursor_set;
   CURSOR :
       while ( my ($token_type, @data) = @{$jsonr->get_token} ) {
@@ -119,7 +170,7 @@ sub execute {
 	  return;
 	};
 	do { # fail
-	  REST::Neo4p::LocalException->throw("Can't parse query resonse (unexpected token looking for next row)\n");
+	  REST::Neo4p::LocalException->throw("Can't parse query response (unexpected token looking for next row)\n");
 	  last;
 	};
       }
@@ -153,7 +204,7 @@ sub execute {
       }
       return \@ret;
     };
-  return 1;
+  return $row_count;
 }
 
 sub fetchrow_arrayref { shift->{_iterator}->() }

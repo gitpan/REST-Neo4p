@@ -1,6 +1,6 @@
 #-*-perl-*-
 #$Id: 009_batch.t 17684 2012-09-23 01:12:42Z jensenma $
-use Test::More qw(no_plan);
+use Test::More tests => 61;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -15,7 +15,7 @@ eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 1;
+my $num_live_tests = 59;
 
 my $not_connected;
 eval {
@@ -55,12 +55,23 @@ SKIP : {
 
   ok $node_assigned_inside_batch, 'node assigned inside batch';
   ok !$node_assigned_inside_batch->is_batch, 'and not a batch node';
-  $DB::single=1;
+
   is $node_assigned_inside_batch->get_property('name'),'__test_node1', 'and property correct';
 
   ok $rel, 'reln assigned inside batch';
   ok !$rel->is_batch, 'and not a batch relationship';
   is $rel->type, 'one2two', 'correct type';
+
+  ok  my $idx2 = REST::Neo4p::Index->new('node' => 'pals_of_bob'), "new index";
+  my $name = 'fred';
+  my $node2;
+  batch {
+      $node2 = REST::Neo4p::Node->new({name => $name});
+      ok $idx2->add_entry($node2, name => $node2->get_property('name')), 'try to add a batch-set node by referring to get_property in batch mode...';
+  } 'keep_objs';
+  my ($node3) = $idx2->find_entries(name => $name);
+  ok !$node3, '..but it does not work';
+
   CLEANUP : {
       my @nodes = $idx->find_entries('name:*');
       for my $n (@nodes) {
@@ -68,5 +79,6 @@ SKIP : {
       }
       ok($_->remove,'remove node') for @nodes;
       ok $idx->remove, 'remove index';
+      ok $idx2->remove, 'remove index';
   }
 }

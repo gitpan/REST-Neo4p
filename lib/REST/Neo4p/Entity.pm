@@ -8,7 +8,7 @@ use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.1282';
+  $REST::Neo4p::Entity::VERSION = '0.1283';
 }
 
 our $ENTITY_TABLE = {};
@@ -122,9 +122,8 @@ sub remove {
     $agent->delete_data($entity_type, @url_components, $$self);
   };
   my $e;
-  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
-    # TODO : handle different classes
-    $e->rethrow;
+  if ($e = Exception::Class->caught('REST::Neo4p::NotFoundException')) {
+    1;
   }
   elsif ($@) {
     ref $@ ? $@->rethrow : die $@;
@@ -182,13 +181,15 @@ sub get_property {
       $decoded_resp = $agent->get_data($entity_type,$$self,$suffix,$_);
     };
     my $e;
-    if ( $e = Exception::Class->caught('REST::Neo4p::CommError')) {
-      $e->rethrow;
+    if ( $e = Exception::Class->caught('REST::Neo4p::NotFoundError')) {
+      push @ret, undef;
     }
-    elsif ($@) {
-      ref $@ ? $@->rethrow : die $@;
+    elsif ( $e = Exception::Class->caught()) {
+      ref $e ? $e->rethrow : die $e;
     }
-    push @ret, $decoded_resp;
+    else {
+      push @ret, $decoded_resp;
+    }
   }
   return @ret == 1 ? $ret[0] : @ret;
 }
@@ -207,12 +208,11 @@ sub get_properties {
     $decoded_resp = $agent->get_data($entity_type,$$self,$suffix);
   };
   my $e;
-  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
-    # TODO : handle different classes
-    $e->rethrow;
+  if ($e = Exception::Class->caught('REST::Neo4p::NotFoundException')) {
+    return;
   }
-  elsif ($@) {
-    ref $@ ? $@->rethrow : die $@;
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
   }
   return $decoded_resp;
   
@@ -348,7 +348,9 @@ sub DESTROY {
   foreach (keys %{$ENTITY_TABLE->{$entity_type}{$$self}}) {
     delete $ENTITY_TABLE->{$entity_type}{$$self}{$_};
   }
+
   delete $ENTITY_TABLE->{$entity_type}{$$self};
+
   return;
 }
 

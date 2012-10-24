@@ -42,3 +42,9 @@ Revision history for Perl module TCGA::Neo4j
     - fixed rt80196 (thanks Sergei)
     - added newlines to all exception messages
     - updated $VERSION for all modules
+0.1283
+    - fixed rt80343 (thanks Joseph)
+    - get_property on a property that doesn't exist now just returns 
+      undef (rather than throwing an exception)
+    - remove() checks for a NotFoundException and simply destroys the 
+      Perl object (rather than throwing an exception)
