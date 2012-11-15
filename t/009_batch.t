@@ -1,6 +1,6 @@
 #-*-perl-*-
-#$Id: 009_batch.t 17684 2012-09-23 01:12:42Z jensenma $
-use Test::More tests => 61;
+#$Id: 009_batch.t 17 2012-11-14 01:01:52Z maj $
+use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
 use lib '../lib';

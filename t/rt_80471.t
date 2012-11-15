@@ -1,6 +1,6 @@
 #-*-perl-*-
-#$Id: rt_80196.t 17 2012-11-14 01:01:52Z maj $
-use Test::More tests => 5;
+#$Id$
+use Test::More tests => 4;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -13,7 +13,7 @@ eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 4;
+my $num_live_tests = 3;
 
 use_ok('REST::Neo4p');
 
@@ -28,14 +28,11 @@ if ( my $e = REST::Neo4p::CommException->caught() ) {
 
 SKIP : {
   skip 'no local connection to neo4j', $num_live_tests if $not_connected;
-  throws_ok {
-    REST::Neo4p::Entity::new_from_json_response('REST::Neo4p::Index');
-  } 'REST::Neo4p::LocalException', 'new_from_json_response(undef) throws local exception';
-  throws_ok { 
-    my $idx = REST::Neo4p->get_index_by_name('node','sxxcfdsjgjkllrarsdwejrkl')
-  } 'REST::Neo4p::NotFoundException', 'missing index throws not found execption';
-  ok ref $@;
-  like $@->message, qr/sxxcfdsjgjkllrarsdwejrkl/, 'message returned';
+  my $AGENT = $REST::Neo4p::AGENT;
+  ok $AGENT->{_actions}{node} =~ s/7474/8474/, 'change post port to 8474 (should refuse connection)';
+  $REST::Neo4p::AGENT::RETRY_WAIT=1; # speed it up for test
+  throws_ok { $AGENT->get_node(1) } 'REST::Neo4p::CommException';
+  like $@, qr/after 3 retries/, 'error message indicates retries attempted';
 
   CLEANUP : {
       1;

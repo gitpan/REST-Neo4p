@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+#$Id: rt_80150.t 17 2012-11-14 01:01:52Z maj $
 use Test::More tests => 4;
 use Test::Exception;
 use Module::Build;

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 003_objs.t 17650 2012-08-31 03:41:43Z jensenma $
+#$Id: 003_objs.t 17 2012-11-14 01:01:52Z maj $
 use Test::More tests => 35;
 use Module::Build;
 use lib '../lib';
