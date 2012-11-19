@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 099_error.t 17 2012-11-14 01:01:52Z maj $
+#$Id: 099_error.t 32 2012-11-19 02:55:34Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -54,8 +54,9 @@ SKIP : {
     throws_ok { $i->get_property('foo') } 'REST::Neo4p::NotSuppException', 'not supported ok';
     throws_ok { $i->set_property(foo => 'bar') } 'REST::Neo4p::NotSuppException', 'not supported ok (2)';
     throws_ok { $i->get_properties } 'REST::Neo4p::NotSuppException', 'not supported ok (3)';
-    throws_ok { REST::Neo4p->get_node_by_id(-1) } 'REST::Neo4p::NotFoundException', 'get bad node id ok';
-    throws_ok { REST::Neo4p->get_relationship_by_id(-1) } 'REST::Neo4p::NotFoundException', 'get bad relationship id ok';
+    diag 'rt80207';
+    ok !REST::Neo4p->get_node_by_id(-1), 'get bad node id ok (returns false rt#80207)'; 
+    ok !REST::Neo4p->get_relationship_by_id(-1), 'get bad relationship id ok';
     ok $n1->remove, 'remove node';
     ok $i->remove, 'remove index';
 }

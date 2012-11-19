@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 005_db.t 17 2012-11-14 01:01:52Z maj $
+#$Id: 005_db.t 32 2012-11-19 02:55:34Z maj $
 use Test::More tests => 34;
 use Test::Exception;
 use Module::Build;
@@ -69,7 +69,7 @@ SKIP : {
 
   CLEANUP : {
       ok $r12->remove, 'remove relationship';
-      throws_ok {REST::Neo4p->get_relationship_by_id($$r12)} 'REST::Neo4p::Exception', 'relationship is gone';
+      ok !REST::Neo4p->get_relationship_by_id($$r12), 'relationship is gone';
       ok $n1->remove, 'remove node';
       ok $n2->remove, 'remove node';
       ok $node_idx->remove, 'remove node index';

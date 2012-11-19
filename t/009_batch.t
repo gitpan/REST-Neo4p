@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 009_batch.t 17 2012-11-14 01:01:52Z maj $
+#$Id: 009_batch.t 21 2012-11-15 03:44:19Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
