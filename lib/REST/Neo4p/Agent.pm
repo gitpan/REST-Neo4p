@@ -1,4 +1,4 @@
-#$Id: Agent.pm 21 2012-11-15 03:44:19Z maj $
+#$Id: Agent.pm 26 2012-11-15 14:39:40Z maj $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -9,15 +9,14 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.1284';
+  $REST::Neo4p::Agent::VERSION = '0.1282';
 }
 
 our $AUTOLOAD;
 our $JOB_CHUNK = 1024;
-our $RQ_RETRIES = 3; # number of request retries to attempt on 500 error
-our $RETRY_WAIT = 5; # secs to wait between retries
 our $JSON = JSON->new()->allow_nonref(1);
-
+our $RQ_RETRIES = 3;
+our $RETRY_WAIT = 5;
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new(@_);
@@ -89,6 +88,7 @@ sub connect {
 # _add_to_batch_queue
 # takes a request and converts to a Neo4j REST batch-friendly
 # hash
+# VERY internal and experimental
 # $url : rest endpoint that would be called ordinarily
 # $rq : [get|delete|post|put]
 # $content : hashref of rq content (post and put)

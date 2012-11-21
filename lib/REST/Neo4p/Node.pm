@@ -1,4 +1,4 @@
-#$Id: Node.pm 17 2012-11-14 01:01:52Z maj $
+#$Id: Node.pm 2 2012-10-30 14:31:22Z maj $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;

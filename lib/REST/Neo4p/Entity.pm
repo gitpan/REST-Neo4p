@@ -1,14 +1,15 @@
-#$Id: Entity.pm 17 2012-11-14 01:01:52Z maj $
+#$Id: Entity.pm 38 2012-11-20 03:07:52Z maj $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use JSON;
+use URI::Escape;
 use strict;
 use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.1283';
+  $REST::Neo4p::Entity::VERSION = '0.20';
 }
 
 our $ENTITY_TABLE = {};
@@ -34,13 +35,12 @@ sub new {
 					$url_components ? @$url_components : ()],
 				       $properties);
   };
-  my $e;
-  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+  if (my $e = REST::Neo4p::Exception->caught()) {
     # TODO : handle cases
     $e->rethrow;
   }
-  elsif ($@) {
-    ref $@ ? $@->rethrow : die $@;
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
   }
 
   $decoded_resp->{self} ||= $agent->location if ref $decoded_resp;
@@ -85,6 +85,7 @@ sub new_from_json_response {
     $ENTITY_TABLE->{$entity_type}{$obj}{self_url} = $self_url;
     $ENTITY_TABLE->{$entity_type}{$obj}{start_id} = $start_id;
     $ENTITY_TABLE->{$entity_type}{$obj}{end_id} = $end_id;
+    $ENTITY_TABLE->{$entity_type}{$obj}{batch} = 0;
     $ENTITY_TABLE->{$entity_type}{$obj}{type} = $decoded_resp->{type};
   }
   if ($REST::Neo4p::CREATE_AUTO_ACCESSORS && ($entity_type ne 'index')) {
@@ -121,12 +122,11 @@ sub remove {
   eval {
     $agent->delete_data($entity_type, @url_components, $$self);
   };
-  my $e;
-  if ($e = Exception::Class->caught('REST::Neo4p::NotFoundException')) {
+  if (my $e = REST::Neo4p::NotFoundException->caught()) {
     1;
   }
-  elsif ($@) {
-    ref $@ ? $@->rethrow : die $@;
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
   }
   $self->DESTROY;
   return 1;
@@ -148,13 +148,13 @@ sub set_property {
       $agent->put_data([$entity_type,$$self,$suffix,
 			$_], $props->{$_});
     };
-    my $e;
-    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+
+    if (my $e = REST::Neo4p::NotFoundException->caught('REST::Neo4p::Exception')) {
       # TODO : handle different classes
       $e->rethrow;
     }
-    elsif ($@) {
-      ref $@ ? $@->rethrow : die $@;
+    elsif ($e = Exception::Class->caught()) {
+      ref $e ? $e->rethrow : die $e;
     }
   }
   # create accessors
@@ -180,14 +180,15 @@ sub get_property {
     eval {
       $decoded_resp = $agent->get_data($entity_type,$$self,$suffix,$_);
     };
-    my $e;
-    if ( $e = Exception::Class->caught('REST::Neo4p::NotFoundError')) {
+
+    if ( my $e = REST::Neo4p::NotFoundException->caught()) {
       push @ret, undef;
     }
     elsif ( $e = Exception::Class->caught()) {
       ref $e ? $e->rethrow : die $e;
     }
     else {
+      _unescape($decoded_resp);
       push @ret, $decoded_resp;
     }
   }
@@ -208,14 +209,33 @@ sub get_properties {
     $decoded_resp = $agent->get_data($entity_type,$$self,$suffix);
   };
   my $e;
-  if ($e = Exception::Class->caught('REST::Neo4p::NotFoundException')) {
+  if ($e = REST::Neo4p::NotFoundException->caught()) {
     return;
   }
   elsif ($e = Exception::Class->caught()) {
     ref $e ? $e->rethrow : die $e;
   }
+  _unescape($decoded_resp);
   return $decoded_resp;
-  
+}
+
+sub _unescape {
+  local $_ = shift;
+  if (ref eq 'HASH') {
+    while ( my ($k,$v) = each %$_ ) {
+      if (ref $v eq '') {
+	$_->{$k} = uri_unescape($v);
+      }
+      else {
+	_unescape($v);
+      }
+    }
+  }
+  elsif (ref eq 'ARRAY') {
+    foreach my $v (@$_) {
+      _unescape($v);
+    }
+  }
 }
 # remove_property( qw(prop1 prop2 ...) )
 sub remove_property {
@@ -230,13 +250,12 @@ sub remove_property {
     eval {
       $agent->delete_data($entity_type,$$self,$suffix,$_);
     };
-    my $e;
-    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    if (my $e = REST::Neo4p::Exception->caught()) {
       # TODO : handle different classes
       $e->rethrow;
     }
-    elsif ($@) {
-      ref $@ ? $@->rethrow : die $@;
+    elsif ($e = Exception::Class->caught()) {
+      ref $e ? $e->rethrow : die $e;
     }
   }
   return 1;
@@ -303,13 +322,13 @@ sub _entity_by_id {
       eval {
 	$decoded_resp = $agent->$rq($id);
       };
-      my $e;
-      if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+
+      if (my $e = REST::Neo4p::Exception->caught()) {
 	# TODO : handle different classes
 	$e->rethrow;
       }
-      elsif ($@) {
-	ref $@ ? $@->rethrow : die $@;
+      elsif ($e = Exception::Class->caught()) {
+	ref $e ? $e->rethrow : die $e;
       }
     }
     $class->new_from_json_response($decoded_resp);

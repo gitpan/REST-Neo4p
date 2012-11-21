@@ -57,3 +57,11 @@ Revision history for Perl module TCGA::Neo4j
 0.1285
     - get_<entity> methods in REST::Neo4p now quietly return undef if item
       not found (thanks Sergei)
+0.20
+    - Added support for application-level constraints (REST::Neo4p::Constrain
+      and REST::Neo4p::Constraint)
+    - refactored tests to better cleanup test entities on failed suites
+    - Module version numbers reflect last version in which the module was
+      modified
+    - fixed problem with escaped spaces in queries
+    

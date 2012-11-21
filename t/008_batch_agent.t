@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 008_batch_agent.t 17 2012-11-14 01:01:52Z maj $#
+#$Id: 008_batch_agent.t 10 2012-11-12 03:13:39Z maj $#
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -44,7 +44,5 @@ SKIP : {
   ok -e $response_content, 'got responses in tmpfile';
   is $agent->batch_length, 0, 'queue length reset to 0';
   ok !defined $agent->{__batch_queue}, 'queue reset';
-  CLEANUP : {
-      1;
-  }
 }
+

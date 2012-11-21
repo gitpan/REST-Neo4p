@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: rt_80196.t 32 2012-11-19 02:55:34Z maj $
+#$Id: rt_80196.t 36 2012-11-20 01:46:25Z maj $
 use Test::More tests => 3;
 use Test::Exception;
 use Module::Build;
@@ -31,7 +31,6 @@ SKIP : {
   throws_ok {
     REST::Neo4p::Entity::new_from_json_response('REST::Neo4p::Index');
   } 'REST::Neo4p::LocalException', 'new_from_json_response(undef) throws local exception';
-
   ok !REST::Neo4p->get_index_by_name('node','sxxcfdsjgjkllrarsdwejrkl'), 
   'missing index is not found';
 

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 007_accessors.t 17 2012-11-14 01:01:52Z maj $
+#$Id: 007_accessors.t 38 2012-11-20 03:07:52Z maj $
 use Test::More tests => 25;
 use Test::Exception;
 use Module::Build;
@@ -7,7 +7,7 @@ use lib '../lib';
 use strict;
 use warnings;
 no warnings qw(once);
-
+my @cleanup;
 my $build;
 eval {
     $build = Module::Build->current;
@@ -31,6 +31,7 @@ SKIP : {
   ok my $n1 = REST::Neo4p::Node->new(), 'node 1';
   ok my $n2 = REST::Neo4p::Node->new(), 'node 2';
   ok my $r12 = $n1->relate_to($n2, "bubba"), 'relationship 1->2';
+  push @cleanup, ($n1,$n2, $r12);
 
   ok $n1->set_property({ dressing => 'mayo' }), 'node prop set with set_property';
   lives_and { is $n1->dressing, 'mayo' } 'getter works';
@@ -43,6 +44,7 @@ SKIP : {
   lives_and { is $r12->amount, 'little bit' } 'setter works';
 
   ok my $n3 = REST::Neo4p::Node->new( {red => 1, yellow => 2, blue => 3} ), 'node3, properties created in constructor';
+  push @cleanup, $n3 if $n3;
   lives_and { is $n3->red, 1 } 'red getter';
   lives_and { is $n3->yellow, 2 } 'yellow getter';
   lives_and { is $n3->blue, 3 } 'blue getter';
@@ -50,12 +52,11 @@ SKIP : {
   lives_and { is $n3->blue, 5 } 'blue setter works';
   my $idx;
   lives_ok {$idx = REST::Neo4p::Index->new('relationship','heydude')} 'index should be created np';
+  push @cleanup, $idx if $idx;
 
+}
+END {
   CLEANUP : {
-      ok $r12->remove, 'remove relationship';
-      ok $n1->remove, 'remove node';
-      ok $n2->remove, 'remove node';
-      ok $n3->remove, 'remove node';
-      ok $idx->remove, 'remove index';
+      ok ($_->remove, 'entity removed') for reverse @cleanup;
   }
 }

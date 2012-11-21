@@ -1,6 +1,6 @@
 #-*-perl-*-
-#$Id: 005_db.t 32 2012-11-19 02:55:34Z maj $
-use Test::More tests => 34;
+#$Id: 005_db.t 39 2012-11-21 04:26:01Z maj $
+use Test::More tests => 32;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -8,12 +8,13 @@ use strict;
 use warnings;
 no warnings qw(once);
 
+my @cleanup;
 my $build;
 eval {
     $build = Module::Build->current;
 };
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
-my $num_live_tests = 33;
+my $num_live_tests = 31;
 
 use_ok('REST::Neo4p');
 
@@ -28,8 +29,11 @@ if ( my $e = REST::Neo4p::CommException->caught() ) {
 SKIP : {
   skip 'no local connection to neo4j', $num_live_tests if $not_connected;
   ok my $n1 = REST::Neo4p::Node->new(), 'node 1';
+#  push @cleanup, $n1 if $n1;
   ok my $n2 = REST::Neo4p::Node->new(), 'node 2';
+  push @cleanup, $n2 if $n2;
   ok my $r12 = $n1->relate_to($n2, "bubba"), 'relationship 1->2';
+
   ok my $n3 = REST::Neo4p->get_node_by_id($$n1), 'got node by id';
   is $$n3, $$n1, 'same node';
   ok my $r = REST::Neo4p->get_relationship_by_id($$r12), 'got relationship by id';
@@ -38,7 +42,9 @@ SKIP : {
   ok grep(/bubba/,@rtypes), 'found relationship type in type list';
 
   ok my $node_idx = REST::Neo4p::Index->new('node', 'node_idx'), 'new node index';
+ # push @cleanup, $node_idx if $node_idx;
   ok my $reln_idx = REST::Neo4p::Index->new('relationship', 'reln_idx'), 'new relationship index';
+  push @cleanup, $reln_idx if $reln_idx;
   ok my @idxs = REST::Neo4p->get_indexes('node'), 'get node indexes';
   is $idxs[0]->type, 'node', 'got a node index';
   ok @idxs = REST::Neo4p->get_indexes('relationship'), 'get relationship indexes';
@@ -56,23 +62,26 @@ SKIP : {
   ok !defined $node_idx->_entry, 'node index gone from ENTITY_TABLE';
 
   ok my $N = REST::Neo4p->get_node_by_id($$n1), 'restore node 1 from db';
+  push @cleanup, $N if $N;
   ok my $R = REST::Neo4p->get_relationship_by_id($$r12), 'restore relationship 12 from db';
   ok my $I = REST::Neo4p->get_index_by_name($$node_idx, 'node'), 'restore node index from db';
+  push @cleanup, $I if $I;
 
   is $$N, $$n1, 'got node 1 back';
   is $$R, $$r12, 'got relationship 12 back';
   is $$I, $$node_idx, 'got node index back';
-  is ${($I->find_entries('node' => 1))[0]}, $$n1, 'resurrected index works';
-
-
+  is ${($I->find_entries('node' => 1))[-1]}, $$n1, 'resurrected index works';
   
+  ok $R->remove, 'remove relationship';
+  ok !REST::Neo4p->get_relationship_by_id($$r12), 'relationship is gone';
+  lives_ok { $REST::Neo4p::AGENT->delete_node($$N) } 'delete node';
+#  ok $REST::Neo4p::AGENT->delete_relationship($$R);
+  lives_ok { $REST::Neo4p::AGENT->delete_node_index($$I) } 'delete node index';
+}
+
+END {
 
   CLEANUP : {
-      ok $r12->remove, 'remove relationship';
-      ok !REST::Neo4p->get_relationship_by_id($$r12), 'relationship is gone';
-      ok $n1->remove, 'remove node';
-      ok $n2->remove, 'remove node';
-      ok $node_idx->remove, 'remove node index';
-      ok $reln_idx->remove, 'remove relationship index';
+      1;
   }
 }

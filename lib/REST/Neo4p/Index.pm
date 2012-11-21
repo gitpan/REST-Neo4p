@@ -1,4 +1,4 @@
-#$Id#
+#$Id: Index.pm 35 2012-11-20 01:35:27Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
@@ -12,6 +12,8 @@ use warnings;
 BEGIN {
   $REST::Neo4p::Index::VERSION = '0.1282';
 }
+
+my $unsafe = "^A-Za-z0-9\-\._\ ~";
 
 # TODO: auto index objects ready-made
 
@@ -86,7 +88,7 @@ sub add_entry {
       $decoded_resp = $agent->$rq([$self->name], 
 				  { uri => $entity->_self_url,
 				    key => $key,
-				    value => uri_escape($value) }
+				    value => uri_escape($value,$unsafe) }
 				 );
     };
     if (my $e = REST::Neo4p::Exception->caught()) {
@@ -114,7 +116,7 @@ sub remove_entry {
   my $rq = 'delete_'.$self->_action;
   if (defined $key) {
     if (defined $value) {
-      @addl_components = ($key, uri_escape($value), $$entity);
+      @addl_components = ($key, uri_escape($value,$unsafe), $$entity);
     }
     else { # !defined $value
       @addl_components = ($key, $$entity);
@@ -150,7 +152,7 @@ sub find_entries {
   if ($value) { # exact key->value match
     eval {
       $decoded_resp = $agent->$rq( $self->name,
-				   $key, uri_escape($value) );
+				   $key, uri_escape($value,$unsafe) );
     };
     my $e;
     if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
@@ -167,7 +169,7 @@ sub find_entries {
     # must add the ?query string to the request url.
     eval {
       $decoded_resp = $agent->$rq( $self->name,
-				   "?query=".uri_escape($query) );
+				   "?query=".uri_escape($query,$unsafe) );
     };
     my $e;
     if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {

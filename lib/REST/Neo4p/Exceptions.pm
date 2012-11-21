@@ -1,7 +1,7 @@
-#$Id: Exceptions.pm 17 2012-11-14 01:01:52Z maj $
+#$Id: Exceptions.pm 13 2012-11-12 14:13:58Z maj $
 package REST::Neo4p::Exceptions;
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.1282';
+  $REST::Neo4p::Exceptions::VERSION = '0.20';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',
@@ -42,6 +42,10 @@ use Exception::Class (
     isa => 'REST::Neo4p::LocalException',
     description => 'Attempt to call a non-supported inherited method'
    },
+  'REST::Neo4p::AbstractMethodException' => {
+    isa => 'REST::Neo4p::LocalException',
+    description => 'Attempt to call a subclass-only method from a parent class'
+   },
   'REST::Neo4p::ClassOnlyException' => {
     isa => 'REST::Neo4p::LocalException',
     message => 'This is a class method only',
@@ -50,7 +54,16 @@ use Exception::Class (
   'REST::Neo4p::QueryResponseException' => {
     isa => 'REST::Neo4p::LocalException',
     description => 'Problem parsing the response to a cypher query (prob. a bug)'
-   }
+   },
+  'REST::Neo4p::ConstraintException' => {
+    isa => 'REST::Neo4p::LocalException',
+    description => 'Application-level database constraint violated',
+    fields => ['args']
+   },
+  'REST::Neo4p::ConstraintSpecException' => {
+    ias => 'REST::Neo4p::LocalException',
+    description => 'Constraint specification syntax incorrect',
+  }
    );
 
 =head1 NAME
@@ -102,6 +115,20 @@ Attempt to use a base method not supported in the subclass.
 =item * REST::Neo4p::NotImplException
 
 Attempt to use a not yet implemented method.
+
+=item * REST::Neo4p::AbstractMethodException
+
+Attempt to call a subclass-only method from a parent class.
+
+=item * REST::Neo4p::ConstraintException
+
+Attempt to perform a database action that violates an application-level
+constraint (L<REST::Neo4p::Constrain>, L<REST::Neo4p::Constraint>).
+
+=item * REST::Neo4p::ConstraintSpecException
+
+Attempt to create a new constraint with incorrect constraint syntax
+(L<REST::Neo4p::Constrain>,L<REST::Neo4p::Constraint>)
 
 =back
 
