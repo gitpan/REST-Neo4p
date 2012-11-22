@@ -1,4 +1,4 @@
-#$Id: Agent.pm 26 2012-11-15 14:39:40Z maj $
+#$Id: Agent.pm 41 2012-11-22 01:14:10Z maj $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.1282';
+  $REST::Neo4p::Agent::VERSION = '0.2000';
 }
 
 our $AUTOLOAD;
@@ -301,16 +301,15 @@ L<http://docs.neo4j.org/chunked/milestone/rest-api.html> for more
 details.
 
 API and HTTP errors are distinguished and thrown by
-L<Exception::Class|Exception::Class> subclasses. See
-L<REST::Neo4p::Exceptions>.
+L<Exception::Class> subclasses. See L<REST::Neo4p::Exceptions>.
 
-C<REST::Neo4p::Agent> is a subclass of L<LWP::UserAgent|LWP::UserAgent>
+REST::Neo4p::Agent is a subclass of L<LWP::UserAgent|LWP::UserAgent>
 and inherits its capabilities.
 
-C<REST::Neo4p::Agent> will retry requests that fail with
-C<REST::Neo4p::CommException>. The default number of retries is 3; the
-default wait time between retries is 5 sec. These can be adjusted by
-setting the package variables
+REST::Neo4p::Agent will retry requests that fail with
+L<REST::Neo4p::CommException|REST::Neo4p::Exceptions>. The default
+number of retries is 3; the default wait time between retries is 5
+sec. These can be adjusted by setting the package variables
 
  $REST::Neo4p::Agent::RQ_RETRIES
  $REST::Neo4p::Agent::RETRY_WAIT
@@ -496,8 +495,9 @@ Set/get current agent mode.
    print "Queue getting long; better execute\n"
  }
 
-Returns current queue length. Throws C<REST::Neo4p::LocalException> if 
-agent not in batch mode.
+Returns current queue length. Throws
+L<REST::Neo4p::Exceptions|REST::Neo4p::LocalException> if agent not in
+batch mode.
 
 =item execute_batch()
 

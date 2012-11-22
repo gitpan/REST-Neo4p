@@ -1,4 +1,4 @@
-#$Id: Entity.pm 38 2012-11-20 03:07:52Z maj $
+#$Id: Entity.pm 41 2012-11-22 01:14:10Z maj $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -9,7 +9,7 @@ use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.20';
+  $REST::Neo4p::Entity::VERSION = '0.2001';
 }
 
 our $ENTITY_TABLE = {};
@@ -400,11 +400,11 @@ L<REST::Neo4p::Node|REST::Neo4p::Index> instead.
 
 =head1 DESCRIPTION
 
-C<REST::Neo4p::Entity> is the base class for the node, relationship
-and index classes which should be used directly. The base class
-encapsulates most of the L<REST::Neo4p::Agent|REST::Neo4p::Agent>
-calls to the Neo4j server, converts JSON responses to Perl references,
-acknowledges errors, and maintains the main object table.
+REST::Neo4p::Entity is the base class for the node, relationship and
+index classes which should be used directly. The base class
+encapsulates most of the L<REST::Neo4p::Agent> calls to the Neo4j
+server, converts JSON responses to Perl references, acknowledges
+errors, and maintains the main object table.
 
 =head1 SEE ALSO
 

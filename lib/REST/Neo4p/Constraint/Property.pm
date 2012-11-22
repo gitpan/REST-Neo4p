@@ -1,4 +1,4 @@
-#$Id: Property.pm 39 2012-11-21 04:26:01Z maj $
+#$Id: Property.pm 41 2012-11-22 01:14:10Z maj $
 package REST::Neo4p::Constraint::Property;
 use base 'REST::Neo4p::Constraint';
 use strict;
@@ -247,7 +247,21 @@ REST::Neo4p::Constraint::Property - Neo4j Property Constraints
 
 =head1 SYNOPSIS
 
-See L<REST::Neo4p::Constraint>.
+ # use REST::Neo4p::Constrain, it's nicer
+
+ $npc = REST::Neo4p::Constraint::NodeProperty->new(
+   'soldier' => { _condition => 'all',
+                  _priority => 1,
+                  name => '',
+                  rank => [],
+                  serial_number => qr/^[0-9]+$/,
+                  army_of => 'one' }
+  );
+
+ $rpc = REST::Neo4p::Constraint::RelationshipProperty->new(
+  'position' => { _condition => 'only',
+                  position => qr/[0-9]+/ }
+  );
 
 =head1 DESCRIPTION
 
@@ -286,7 +300,11 @@ Constraint hash specification:
 
 =item add_constraint()
 
+ $np->add_constraint( optional_accessory => [qw(tie ascot boutonniere)] );
+
 =item remove_constraint()
+
+ $np->remove_constraint( 'unneeded_property' );
 
 =item tag()
 
