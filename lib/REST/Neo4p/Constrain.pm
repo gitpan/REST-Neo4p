@@ -1,4 +1,4 @@
-#$Id: Constrain.pm 41 2012-11-22 01:14:10Z maj $
+#$Id: Constrain.pm 43 2012-11-22 03:07:32Z maj $
 package REST::Neo4p::Constrain;
 use base 'Exporter';
 use REST::Neo4p::Constraint qw(:all);
@@ -9,7 +9,7 @@ no warnings qw(once redefine);
 
 
 BEGIN {
-  $REST::Neo4p::Constrain::VERSION = '0.2001';
+  $REST::Neo4p::Constrain::VERSION = '0.2002';
 }
 our @EXPORT = qw(create_constraint drop_constraint constrain relax);
 our @VALIDATE = qw(validate_properties validate_relationship validate_relationship_type);
@@ -277,7 +277,7 @@ REST::Neo4p::Constrain - Create and apply Neo4j app-level constraints
  );
 
  create_constraint(
-  tag => 'ignore',
+  tag => 'loves',
   type => 'relationship',
   rtype => 'LOVES',
   constraints =>  [{ pet => 'owner' },
