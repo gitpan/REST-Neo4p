@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 022_constrain.t 10 2012-11-12 03:13:39Z maj $#
+#$Id: 023_constrain_synopsis.t 46 2012-11-24 20:25:46Z maj $#
 use Test::More qw(no_plan);
 use Test::Exception;
 use File::Temp qw(tempfile);

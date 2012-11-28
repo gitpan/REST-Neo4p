@@ -1,4 +1,4 @@
-#$Id: Constrain.pm 43 2012-11-22 03:07:32Z maj $
+#$Id: Constrain.pm 46 2012-11-24 20:25:46Z maj $
 package REST::Neo4p::Constrain;
 use base 'Exporter';
 use REST::Neo4p::Constraint qw(:all);

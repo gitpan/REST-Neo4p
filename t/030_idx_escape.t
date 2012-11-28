@@ -1,5 +1,5 @@
 #-*- perl -*-
-#$Id$
+#$Id: 030_idx_escape.t 46 2012-11-24 20:25:46Z maj $
 
 use Test::More qw(no_plan);
 use Module::Build;

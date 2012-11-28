@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+#$Id: rt_80471.t 46 2012-11-24 20:25:46Z maj $
 use Test::More tests => 4;
 use Test::Exception;
 use Module::Build;
@@ -38,4 +38,4 @@ SKIP : {
       1;
   }
 }
-#$Id$
+#$Id: rt_80471.t 46 2012-11-24 20:25:46Z maj $

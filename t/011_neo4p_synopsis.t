@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+#$Id: 011_neo4p_synopsis.t 46 2012-11-24 20:25:46Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
