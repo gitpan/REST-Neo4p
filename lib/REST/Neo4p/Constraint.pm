@@ -1,4 +1,4 @@
-#$Id: Constraint.pm 41 2012-11-22 01:14:10Z maj $
+#$Id: Constraint.pm 50 2012-12-04 04:58:36Z maj $
 package REST::Neo4p::Constraint;
 use base 'Exporter';
 use REST::Neo4p;
@@ -123,9 +123,9 @@ sub _fix_constraints {
   if (ref eq 'HASH') {
     while (my ($k, $v) = each %$_) {
       if ($v && ($v =~ /^qr\//)) {
-	 if ($v =~ /\(\?\^:.*\)/) {
-	   $v =~ s|/\(\?\^:|/|; # kludge - eval wants to wrap (?:^...) around a qr string
-	   $v =~ s|\)/|/|; # kludge -      even if one is there already
+	 if ($v =~ /\(\?(\^|-[a-z]+):.*\)/) {
+	   $v =~ s{/\(\?(\^|-[a-z]+):}{/}; # kludge - eval wants to wrap (?:^...) around a qr string
+	   $v =~ s{\)/}{/}; # kludge -      even if one is there already
 	 }
 	$_->{$k} = eval $v; # replace with Regexp
       }
