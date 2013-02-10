@@ -1,4 +1,4 @@
-#$Id: Index.pm 41 2012-11-22 01:14:10Z maj $#
+#$Id: Index.pm 93 2013-02-10 21:24:09Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2001';
+  $REST::Neo4p::Index::VERSION = '0.2013';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
@@ -238,11 +238,11 @@ REST::Neo4p::Index objects represent Neo4j node and relationship indexes.
 
 =item new()
 
- $node_idx = REST::Neo4p::Index('node', 'my_node_index');
- $rel_idx = REST::Neo4p::Index('relationship', 'my_rel_index');
- $fulltext_idx = REST::Neo4p::Index('node', "my_ft_index,
-                                    { type = 'fulltext',
-                                      provider = 'lucene' });
+ $node_idx = REST::Neo4p::Index->new('node', 'my_node_index');
+ $rel_idx = REST::Neo4p::Index->new('relationship', 'my_rel_index');
+ $fulltext_idx = REST::Neo4p::Index->new('node', "my_ft_index,
+                                    { type => 'fulltext',
+                                      provider => 'lucene' });
 
 Creates a new index of the type given in the first argument, with the
 name given in the second argument. The optional third argument is a

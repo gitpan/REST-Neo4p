@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 50 2012-12-04 04:58:36Z maj $
+#$Id: Neo4p.pm 93 2013-02-10 21:24:09Z maj $
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2012';
+  $REST::Neo4p::VERSION = '0.2013';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
