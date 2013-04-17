@@ -1,7 +1,7 @@
-#$Id: Exceptions.pm 13 2012-11-12 14:13:58Z maj $
+#$Id: Exceptions.pm 96 2013-02-11 00:50:26Z maj $
 package REST::Neo4p::Exceptions;
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.20';
+  $REST::Neo4p::Exceptions::VERSION = '0.2020';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',
@@ -26,6 +26,12 @@ use Exception::Class (
     fields => [ 'code', 'neo4j_message', 
 		'neo4j_exception', 'neo4j_stacktrace' ],
     description => 'URL or item not found'
+   },
+  'REST::Neo4p::ConflictException' => {
+    isa => 'REST::Neo4p::Neo4jException',
+    fields => [ 'code', 'neo4j_message', 
+		'neo4j_exception', 'neo4j_stacktrace' ],
+    description => 'Conflict (409) thrown when fail is specified for create_unique on indexes'
    },
   'REST::Neo4p::QuerySyntaxException' =>
     {

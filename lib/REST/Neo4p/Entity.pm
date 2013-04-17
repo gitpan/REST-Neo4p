@@ -1,4 +1,4 @@
-#$Id: Entity.pm 41 2012-11-22 01:14:10Z maj $
+#$Id: Entity.pm 151 2013-04-17 04:53:55Z maj $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -161,7 +161,7 @@ sub set_property {
   if ($REST::Neo4p::CREATE_AUTO_ACCESSORS) {
     for (keys %$props) { $self->_create_accessors($_) unless $self->can($_) }
   }
-  return 1;
+  return $self;
 }
 
 # @prop_values = get_property( qw(prop1 prop2 ...) )
@@ -258,7 +258,7 @@ sub remove_property {
       ref $e ? $e->rethrow : die $e;
     }
   }
-  return 1;
+  return $self;
 }
 
 sub id { ${$_[0]} }

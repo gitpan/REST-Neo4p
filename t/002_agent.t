@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 002_agent.t 2 2012-10-30 14:31:22Z maj $
+#$Id: 002_agent.t 153 2013-04-17 05:13:37Z maj $
 use Test::More tests => 8;
 use Module::Build;
 use lib '../lib';
@@ -28,12 +28,13 @@ eval {
 };
 if ( my $e = REST::Neo4p::CommException->caught() ) {
   $not_connected = 1;
-  diag "Test server unavailable : ".$e->message;
+  diag "Test server unavailable : tests skipped";
 }
 
 SKIP : {
   skip 'no local connection to neo4j',3 if $not_connected;
     is $ua->node, join('/',$TEST_SERVER, qw(db data node)), 'node url looks good';
-    like $ua->neo4j_version, qr/^1.8/, 'neo4j version 1.8...';
+  my ($version) = $ua->neo4j_version =~ /(^[0-9]+\.[0-9]+)/;
+  cmp_ok $version, '>=', 1.8, 'Neo4j version >= 1.8 as required';
     like $ua->relationship_types, qr/^http.*types/, 'relationship types url';
 }

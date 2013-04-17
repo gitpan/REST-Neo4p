@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 023_constrain_synopsis.t 46 2012-11-24 20:25:46Z maj $#
+#$Id: 023_constrain_synopsis.t 153 2013-04-17 05:13:37Z maj $#
 use Test::More qw(no_plan);
 use Test::Exception;
 use File::Temp qw(tempfile);
@@ -27,7 +27,7 @@ eval {
 };
 if ( my $e = REST::Neo4p::CommException->caught() ) {
   $not_connected = 1;
-  diag "Test server unavailable : ".$e->message;
+  diag "Test server unavailable : tests skipped";
 }
 
 SKIP : {

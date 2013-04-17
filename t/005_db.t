@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 005_db.t 39 2012-11-21 04:26:01Z maj $
+#$Id: 005_db.t 153 2013-04-17 05:13:37Z maj $
 use Test::More tests => 32;
 use Test::Exception;
 use Module::Build;
@@ -24,7 +24,7 @@ eval {
 };
 if ( my $e = REST::Neo4p::CommException->caught() ) {
   $not_connected = 1;
-  diag "Test server unavailable : ".$e->message;
+  diag "Test server unavailable : tests skipped";
 }
 SKIP : {
   skip 'no local connection to neo4j', $num_live_tests if $not_connected;

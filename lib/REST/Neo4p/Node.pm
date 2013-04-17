@@ -1,4 +1,4 @@
-#$Id: Node.pm 41 2012-11-22 01:14:10Z maj $
+#$Id: Node.pm 155 2013-04-17 05:30:21Z maj $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -8,7 +8,7 @@ use base 'REST::Neo4p::Entity';
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2001';
+  $REST::Neo4p::Node::VERSION = '0.2100';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -93,6 +93,84 @@ sub get_relationships {
 	  REST::Neo4p::Relationship->new_from_batch_response($_);
   }
   return @ret;
+}
+
+sub set_labels {
+  my $self = shift;
+  my @labels = @_;
+  my $agent = $REST::Neo4p::AGENT;
+  my $decoded_resp;
+  eval {
+    $decoded_resp= $agent->put_node([$$self,'labels'],[@labels]);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $self;
+}
+
+sub add_labels {
+  my $self = shift;
+  my @labels = @_;
+  my $agent = $REST::Neo4p::AGENT;
+  my $decoded_resp;
+  eval {
+    $decoded_resp= $agent->post_node([$$self,'labels'],[@labels]);
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $self;
+}
+
+sub get_labels {
+  my $self = shift;
+  my $agent = $REST::Neo4p::AGENT;
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->get_node($$self, 'labels');
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return @$decoded_resp;
+}
+
+sub drop_labels {
+  my $self = shift;
+  my @labels = @_;
+  return $self unless @labels;
+  my $agent = $REST::Neo4p::AGENT;
+  my $decoded_resp;
+  eval {
+    foreach my $label (@labels) {
+      $decoded_resp = $agent->delete_node($$self, 'labels', $label);
+    }
+  };
+  my $e;
+  if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($@) {
+    ref $@ ? $@->rethrow : die $@;
+  }
+  return $self;
 }
 
 sub get_incoming_relationships { shift->get_relationships('in',@_) }
@@ -186,6 +264,38 @@ of L<REST::Neo4p::Relationship|REST::Neo4p::Relationship> objects;
 =item property auto-accessors
 
 See L<REST::Neo4p/Property Auto-accessors>.
+
+=back
+
+=head2 METHODS (Neo4j Version 2.0)
+
+These methods are supported by v2.0 of the Neo4j server.
+
+=over
+
+=item set_labels()
+
+ my $node = $node->set_labels($label1, $label2);
+
+Sets the node's labels. This replaces any existing node labels.
+
+=item add_labels()
+
+ my $node = $node->add_labels($label3, $label4);
+
+Add labels to the nodes existing labels.
+
+=item get_labels()
+
+ my @labels = $node->get_labels;
+
+Retrieve the node's list of labels, if any.
+
+=item drop_labels()
+
+ my $node = $node->drop_labels($label1, $label4);
+
+Remove one or more labels from a node.
 
 =back
 

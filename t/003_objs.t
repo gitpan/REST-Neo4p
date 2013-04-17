@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 003_objs.t 25 2012-11-15 14:30:07Z maj $
+#$Id: 003_objs.t 153 2013-04-17 05:13:37Z maj $
 use Test::More tests => 35;
 use Module::Build;
 use lib '../lib';
@@ -24,7 +24,7 @@ eval {
 };
 if ( my $e = REST::Neo4p::CommException->caught() ) {
   $not_connected = 1;
-  diag "Test server unavailable : ".$e->message;
+  diag "Test server unavailable : tests skipped";
 }
 
 SKIP : {

@@ -1,4 +1,4 @@
-#$Id: Index.pm 93 2013-02-10 21:24:09Z maj $#
+#$Id: Index.pm 154 2013-04-17 05:28:59Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2013';
+  $REST::Neo4p::Index::VERSION = '0.2020';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
@@ -171,13 +171,12 @@ sub find_entries {
       $decoded_resp = $agent->$rq( $self->name,
 				   "?query=".uri_escape($query,$unsafe) );
     };
-    my $e;
-    if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
+    if (my $e = Exception::Class->caught('REST::Neo4p::Exception')) {
       # TODO : handle different classes
       $e->rethrow;
     }
-    elsif ($@) {
-      ref $@ ? $@->rethrow : die $@;
+    elsif ($e = Exception::Class->caught) {
+      ref $e ? $e->rethrow : die $e;
     }
   }
   my @ret; 
@@ -189,6 +188,99 @@ sub find_entries {
   return @ret;
 }
 
+# create_unique : route to correct method
+sub create_unique {
+  my $self = shift;
+  my $method = 'create_unique_'.$self->type;
+  $self->$method(@_);
+}
+
+# single key => value pair
+sub create_unique_node {
+  my $self = shift;
+  my ($key, $value, $properties, $on_found) = @_;
+  $on_found ||= 'get';
+  $on_found = lc $on_found;
+  unless ($self->type eq 'node') {
+    REST::Neo4p::LocalException->throw("Can't create node on a non-node index\n");
+  }
+  unless ($key && $value && $properties && (ref $properties eq 'HASH')) {
+    REST::Neo4p::LocalException->throw("Args required: key => value, hashref_of_properties\n");
+  }
+  unless ( $on_found =~ /^get|fail$/ ) {
+    REST::Neo4p::LocalException->throw("on_found parameter (4th arg) must be one of 'get', 'fail'\n");
+  }
+  my $agent = $REST::Neo4p::AGENT;
+  my $rq = "post_".$self->_action;
+  my $restq = 'uniqueness='.($on_found eq 'get' ? 'get_or_create' : 'create_or_fail');
+  my $decoded_resp;
+  eval {
+    $decoded_resp = $agent->$rq([join('?',$self->name,$restq)],
+				{ key => $key,
+				  value => $value,
+				  properties => $properties}
+			       );
+  };
+  if (my $e = Exception::Class->caught('REST::Neo4p::ConflictException')) {
+    if ($on_found eq 'fail') {
+      return; # user expects to get nothing back if not found
+    }
+    else {
+      $e->rethrow; # uh oh, better bail
+    }
+  }
+  elsif ($e = Exception::Class->caught) {
+    ref $e ? $e->rethrow : die $e;
+  }
+  return REST::Neo4p::Node->new_from_json_response($decoded_resp);
+}
+
+sub create_unique_relationship {
+  my $self = shift;
+  my ($key, $value, $from_node, $to_node, $rel_type, $properties, $on_found) = @_;
+  $on_found ||= 'get';
+  $on_found = lc $on_found;
+  unless ($self->type eq 'relationship') {
+    REST::Neo4p::LocalException->throw("Can't create relationship on a non-relationship index\n");
+  }
+  unless ($key && $value && $from_node && $to_node && $rel_type &&
+	    (ref $from_node eq 'REST::Neo4p::Node') &&
+	      (ref $to_node eq 'REST::Neo4p::Node') ) {
+    REST::Neo4p::LocalException->throw("Args required: key => value, from_node => to_node, rel_type\n");
+  }
+  unless (!defined $properties || (ref $properties eq 'HASH')) {
+    REST::Neo4p::LocalException->throw("properties parameter (6th arg) must be undef or hashref of properties\n");
+  }
+  unless ( $on_found =~ /^get|fail$/ ) {
+    REST::Neo4p::LocalException->throw("on_found parameter (7th arg) must be one of 'get', 'fail'\n");
+  }
+  my $agent = $REST::Neo4p::AGENT;
+  my $rq = "post_".$self->_action;
+  my $restq = 'uniqueness='.($on_found eq 'get' ? 'get_or_create' : 'create_or_fail');
+  my $decoded_resp;
+  my %json_params = ( key => $key,
+		      value => $value,
+		      start => $from_node->_self_url,
+		      end => $to_node->_self_url,
+		      type => $rel_type );
+  $json_params{properties} = $properties if defined $properties;
+  eval {
+    $decoded_resp = $agent->$rq([join('?',$self->name,$restq)],
+				\%json_params);
+  };
+  if (my $e = Exception::Class->caught('REST::Neo4p::ConflictException')) {
+    if ($on_found eq 'fail') {
+      return; # user expects to get nothing back if not found
+    }
+    else {
+      $e->rethrow; # uh oh, better bail
+    }
+  }
+  elsif ($e = Exception::Class->caught) {
+    ref $e ? $e->rethrow : die $e;
+  }
+  return REST::Neo4p::Relationship->new_from_json_response($decoded_resp);
+}
 
 # index name
 sub name { ${$_[0]} }
@@ -212,11 +304,11 @@ REST::Neo4p::Index - Neo4j index object
 
 =head1 SYNOPSIS
 
- $node_idx = REST::Neo4p::Index('node', 'my_node_index');
- $rel_idx = REST::Neo4p::Index('relationship', 'my_rel_index');
- $fulltext_idx = REST::Neo4p::Index('node', "my_ft_index,
-                                    { type = 'fulltext',
-                                      provider = 'lucene' });
+ $node_idx = REST::Neo4p::Index->new('node', 'my_node_index');
+ $rel_idx = REST::Neo4p::Index->new('relationship', 'my_rel_index');
+ $fulltext_idx = REST::Neo4p::Index->new('node', "my_ft_index,
+                                    { type => 'fulltext',
+                                      provider => 'lucene' });
  $node_idx->add_entry( $ShaggyNode, 'pet' => 'ScoobyDoo' );
  $node_idx->add_entry( $ShaggyNode,
    'pet' => 'ScoobyDoo',
@@ -261,7 +353,7 @@ B<CAUTION>: This method removes the index from the database and destroys the obj
 
 =item type()
 
- if ($index->type eq 'node') { $index->add_entry( $node, $key ); }
+ if ($index->type eq 'node') { $index->add_entry( $node, $key => $value ); }
 
 =item add_entry()
 
@@ -286,6 +378,20 @@ query string and passed to the index as such. The Neo4j default is
 L<Lucene|http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/queryparsersyntax.html>.
 
 C<find_entries()> is not supported in batch mode.
+
+=item create_unique()
+
+ $node = $index->create_unique( name => 'fred', 
+                                { name => 'fred', state => 'unshaven'} );
+
+ $reln = $index->create_unique( name =. 'married_to',
+                                $node => $wilma_node );
+
+Creates a unique node or relationship on the basis of presence or absence
+of a matching item in the index. 
+
+Optional final argument: one of 'get' or 'fail'. If 'get' (default), the 
+matching item is returned if present. If 'fail', false is returned.
 
 =back
 

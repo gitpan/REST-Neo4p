@@ -1,4 +1,4 @@
-#$Id: Agent.pm 46 2012-11-24 20:25:46Z maj $
+#$Id: Agent.pm 96 2013-02-11 00:50:26Z maj $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2000';
+  $REST::Neo4p::Agent::VERSION = '0.2020';
 }
 
 our $AUTOLOAD;
@@ -249,9 +249,15 @@ sub __do_request {
 	    neo4j_exception => $self->{_decoded_content}->{exception},
 	    neo4j_stacktrace =>  $self->{_decoded_content}->{stacktrace}
 	   );
-	  my $xclass = 'REST::Neo4p::Neo4jException';
+	  my $xclass;
 	  if ($resp->code == 404) {
 	    $xclass = 'REST::Neo4p::NotFoundException';
+	  }
+	  elsif ($resp->code == 409) {
+	    $xclass = 'REST::Neo4p::ConflictException';
+	  }
+	  else {
+	    $xclass = 'REST::Neo4p::Neo4jException';
 	  }
 	  if ( $error_fields{neo4j_exception} && 
 		 ($error_fields{neo4j_exception} =~ /^Syntax/ )) {
