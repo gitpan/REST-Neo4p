@@ -82,3 +82,6 @@ Revision history for Perl module TCGA::Neo4j
 0.2101
     - REST::Neo4p::agent() allows access to the LWP::UserAgent to change
       parameters, add credentials, etc. before/after connection
+0.2110
+    - Query.pm and Agent.pm use pure File::Temp objects for
+      autocleanup that seems to just work (thanks symondsjo)
