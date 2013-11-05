@@ -85,3 +85,5 @@ Revision history for Perl module TCGA::Neo4j
 0.2110
     - Query.pm and Agent.pm use pure File::Temp objects for
       autocleanup that seems to just work (thanks symondsjo)
+0.2111
+    - pod typo fixes
