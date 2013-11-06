@@ -1,4 +1,4 @@
-#$Id: Index.pm 154 2013-04-17 05:28:59Z maj $#
+#$Id: Index.pm 268 2013-11-06 03:34:34Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;

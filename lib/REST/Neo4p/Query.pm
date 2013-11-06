@@ -1,4 +1,4 @@
-#$Id: Query.pm 46 2012-11-24 20:25:46Z maj $
+#$Id: Query.pm 268 2013-11-06 03:34:34Z maj $
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 008_batch_agent.t 153 2013-04-17 05:13:37Z maj $#
+#$Id: 008_batch_agent.t 268 2013-11-06 03:34:34Z maj $#
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
