@@ -1,4 +1,4 @@
-#$Id: Constraint.pm 51 2012-12-04 05:39:43Z maj $
+#$Id: Constraint.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Constraint;
 use base 'Exporter';
 use REST::Neo4p;
@@ -498,7 +498,7 @@ L<REST::Neo4p::Constraint::RelationshipType>. L<REST::Neo4p::Node>, L<REST::Neo4
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

@@ -1,4 +1,4 @@
-#$Id: Agent.pm 268 2013-11-06 03:34:34Z maj $
+#$Id: Agent.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -546,7 +546,7 @@ has default value of 1024.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

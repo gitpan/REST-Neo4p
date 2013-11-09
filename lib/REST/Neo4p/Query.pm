@@ -1,4 +1,4 @@
-#$Id: Query.pm 268 2013-11-06 03:34:34Z maj $
+#$Id: Query.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
@@ -9,7 +9,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Query::VERSION = '0.2110';
+  $REST::Neo4p::Query::VERSION = '0.2114';
 }
 
 my $BUFSIZE = 4096;
@@ -28,6 +28,7 @@ sub new {
 	  'Statement' => $q_string,
 	  'NUM_OF_PARAMS' => $params ? scalar keys %$params : 0,
 	  'ParamValues' => $params,
+	  'ResponseAsObjects' => 1,
 	  '_tempfile' => ''
 	}, $class;
 }
@@ -190,12 +191,14 @@ sub execute {
 	      ref $e ? $e->rethrow : die $e;
 	    }
 	    my $entity_class = 'REST::Neo4p::'.$entity_type;
-	    push @ret, $entity_class->new_from_json_response($elt);
+	    push @ret, $self->{ResponseAsObjects} ?
+	      $entity_class->new_from_json_response($elt) :
+		$entity_class->simple_from_json_response($elt);
 	    last;
 	  };
 	  /ARRAY/ && do {
 	    for my $ary_elt (@$elt) {
-	      my ($entity_type,$entity_class);
+	      my $entity_type;
 	      eval {
 		$entity_type = _response_entity($ary_elt);
 	      };
@@ -207,8 +210,10 @@ sub execute {
 		push @ret, $ary_elt;
 	      }
 	      else {
-		$entity_class = 'REST::Neo4p::'.$entity_type;
-		push @ret, $entity_class->new_from_json_response($ary_elt);
+		my $entity_class = 'REST::Neo4p::'.$entity_type;
+		push @ret, $self->{ResponseAsObjects} ?
+		  $entity_class->new_from_json_response($ary_elt) :
+		    $entity_class->simple_from_json_response($ary_elt) ;
 	      }
 	    }
 	    last;
@@ -362,14 +367,37 @@ scalars are returned as-is.
   }
 
 Returns the HTTP error code and Neo4j server error message if an error
-was encountered on execution. Set C<$query-E<gt>{RaiseError}> to die
-immediately (e.g., to catch the exception in an C<eval> block).
+was encountered on execution. 
+
+=back
+
+=head2 ATTRIBUTES
+
+=over 
+
+=item RaiseError
+
+ $q->{RaiseError} = 1;
+
+Set C<$query-E<gt>{RaiseError}> to die immediately (e.g., to catch the exception in an C<eval> block).
+
+=item ResponseAsObjects
+
+ $q->{ResponseAsObjects} = 0;
+ $plain_perl = $q->fetch;
+
+If set to true (the default), query reponses are returned as
+REST::Neo4p objects.  If false, nodes, relationships and paths are
+returned as simple perl structures.  See
+L<REST::Neo4p::Node/as_simple()>,
+L<REST::Neo4p::Relationship/as_simple()>,
+L<REST::Neo4p::Path/as_simple()> for details.
 
 =back
 
 =head1 SEE ALSO
 
-L<REST::Neo4p>, L<REST::Neo4p::Path>,L<REST::Neo4p::Agent>.
+L<REST::Neo4p>, L<REST::Neo4p::Path>, L<REST::Neo4p::Agent>.
 
 =head1 AUTHOR
 
@@ -379,7 +407,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Path>,L<REST::Neo4p::Agent>.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

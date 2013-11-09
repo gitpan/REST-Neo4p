@@ -1,4 +1,4 @@
-#$Id: Relationship.pm 41 2012-11-22 01:14:10Z maj $
+#$Id: Relationship.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Constraint::Relationship;
 use base 'REST::Neo4p::Constraint';
 use strict;
@@ -269,7 +269,7 @@ L<REST::Neo4p::Constraint::RelationshipType>.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

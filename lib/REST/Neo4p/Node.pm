@@ -1,4 +1,4 @@
-#$Id: Node.pm 155 2013-04-17 05:30:21Z maj $
+#$Id: Node.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Node;
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
@@ -8,7 +8,7 @@ use base 'REST::Neo4p::Entity';
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2100';
+  $REST::Neo4p::Node::VERSION = '0.2120';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -182,6 +182,26 @@ sub get_typed_relationships {
   REST::Neo4p::NotImplException->throw( "get_typed_relationships() not implemented yet\n" );
 }
 
+sub as_simple {
+  my $self = shift;
+  my $ret;
+  my $props = $self->get_properties;
+  $ret->{_node} = $$self;
+  $ret->{$_} = $props->{$_} for keys %$props;
+  return $ret;
+}
+
+sub simple_from_json_response {
+  my $class = shift;
+  my ($decoded_resp) = @_;
+  my $ret;
+  # node id
+  ($ret->{_node}) = $decoded_resp->{self} =~ m{.*/([0-9]+)$};
+  # node properties
+  $ret->{$_} = $decoded_resp->{data}->{$_} for keys %{$decoded_resp->{data}};
+  return $ret;
+}
+
 =head1 NAME
 
 REST::Neo4p::Node - Neo4j node object
@@ -265,9 +285,17 @@ of L<REST::Neo4p::Relationship|REST::Neo4p::Relationship> objects;
 
 See L<REST::Neo4p/Property Auto-accessors>.
 
+=item as_simple()
+
+ $simple_node = $node1->as_simple
+ $node_id = $simple_node->{_node};
+ $value = $simple_node->{$property_name};
+
+Get node as a simple hashref.
+
 =back
 
-=head2 METHODS (Neo4j Version 2.0)
+=head2 METHODS - Neo4j Version 2.0
 
 These methods are supported by v2.0 of the Neo4j server.
 
@@ -313,7 +341,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Index>.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

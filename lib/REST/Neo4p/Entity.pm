@@ -1,4 +1,4 @@
-#$Id: Entity.pm 151 2013-04-17 04:53:55Z maj $
+#$Id: Entity.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
@@ -261,6 +261,17 @@ sub remove_property {
   return $self;
 }
 
+sub as_simple {
+  my $self = shift;
+  return;
+}
+
+sub simple_from_json_response {
+  my $class = shift;
+  my ($decoded_resp) = @_;
+  return;
+}
+
 sub id { ${$_[0]} }
 sub is_batch { shift->_entry->{batch} }
 sub entity_type { shift->_entry->{entity_type} }
@@ -419,7 +430,7 @@ L<REST::Neo4p::Index>.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

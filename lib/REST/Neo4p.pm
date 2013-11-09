@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 272 2013-11-09 19:20:20Z maj $
+#$Id: Neo4p.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p;
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2113';
+  $REST::Neo4p::VERSION = '0.2120';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -364,7 +364,7 @@ L<REST::Neo4p::Constrain>, L<REST::Neo4p::Constraint>.
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

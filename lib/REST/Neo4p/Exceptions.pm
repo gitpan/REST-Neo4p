@@ -1,4 +1,4 @@
-#$Id: Exceptions.pm 96 2013-02-11 00:50:26Z maj $
+#$Id: Exceptions.pm 276 2013-11-09 23:45:30Z maj $
 package REST::Neo4p::Exceptions;
 BEGIN {
   $REST::Neo4p::Exceptions::VERSION = '0.2020';
@@ -174,7 +174,7 @@ L<REST::Neo4p>, L<Exception::Class>
 
 =head1 LICENSE
 
-Copyright (c) 2012 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 
