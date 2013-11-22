@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: rt_80471.t 275 2013-11-09 23:32:36Z maj $
+#$Id: rt_80471.t 284 2013-11-16 17:19:59Z maj $
 use Test::More tests => 4;
 use Test::Exception;
 use Module::Build;
@@ -32,7 +32,7 @@ if ( my $e = REST::Neo4p::CommException->caught() ) {
 
 SKIP : {
   skip 'no local connection to neo4j', $num_live_tests if $not_connected;
-  my $AGENT = $REST::Neo4p::AGENT;
+  my $AGENT = REST::Neo4p->agent;
   ok $AGENT->{_actions}{node} =~ s/7474/8474/, 'change post port to 8474 (should refuse connection)';
   $REST::Neo4p::AGENT::RETRY_WAIT=1; # speed it up for test
   throws_ok { $AGENT->get_node(1) } 'REST::Neo4p::CommException';
@@ -42,4 +42,4 @@ SKIP : {
       1;
   }
 }
-#$Id: rt_80471.t 275 2013-11-09 23:32:36Z maj $
+#$Id: rt_80471.t 284 2013-11-16 17:19:59Z maj $

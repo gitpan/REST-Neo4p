@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 099_error.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 099_error.t 284 2013-11-16 17:19:59Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -21,7 +21,7 @@ eval {
 my $TEST_SERVER = $build ? $build->notes('test_server') : 'http://127.0.0.1:7474';
 my $num_live_tests = 10;
 
-throws_ok { REST::Neo4p->get_indexes } 'REST::Neo4p::CommException', 'not connected ok';
+throws_ok { REST::Neo4p->get_indexes('relationship') } 'REST::Neo4p::CommException', 'not connected ok';
 like $@->message, qr/not connected/i, 'not connected ok (2)';
 
 throws_ok { REST::Neo4p::Entity->new() } 'REST::Neo4p::NotSuppException', 'attempt to instantiate Entity ok';
@@ -43,7 +43,7 @@ SKIP : {
     skip 'no connection to neo4j',$num_live_tests if $not_connected;
     my $n1 = REST::Neo4p::Node->new();
     throws_ok { $n1->set_property('boog') } 'REST::Neo4p::LocalException', 'bad set_property arg ok';
-    my $agent = $REST::Neo4p::AGENT;
+    my $agent = REST::Neo4p->agent;
     throws_ok { $agent->get_frelb } 'REST::Neo4p::LocalException', 'bad action ok';
     throws_ok { $agent->get_data('frelb') } 'REST::Neo4p::NotFoundException', 'bad url ok';
     is $@->code, 404, '404 ok';

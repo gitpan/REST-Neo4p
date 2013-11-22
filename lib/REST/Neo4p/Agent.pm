@@ -1,4 +1,5 @@
-#$Id: Agent.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Agent.pm 291 2013-11-22 02:17:32Z maj $
+use v5.10;
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
@@ -8,8 +9,9 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 
+our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2110';
+  $REST::Neo4p::Agent::VERSION = '0.2200';
 }
 
 our $AUTOLOAD;
@@ -20,6 +22,7 @@ our $RETRY_WAIT = 5;
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new(@_);
+  $self->agent("Neo4p/$VERSION");
   $self->default_header( 'Accept' => 'application/json' );
   $self->default_header( 'Content-Type' => 'application/json' );
   $self->default_header( 'X-Stream' => 'true' );
@@ -196,13 +199,19 @@ sub AUTOLOAD {
   return $self->{_decoded_content};
 }
 
+# $rq : [get|post|put|delete]
+# $action : {neo4j REST endpt action}
+# @args : depends on REST rq
+# get|delete : my @url_components = @args;
+# post|put : my ($url_components, $content, $addl_headers) = @args;
+
 sub __do_request {
   my $self = shift;
   my ($rq, $action, @args) = @_;
   $self->{_errmsg} = $self->{_location} = $self->{_decoded_content} = undef;
-  for ($rq) {
-    my $resp;
-    /get|delete/ && do {
+  my $resp;
+  given ($rq) {
+    when (/get|delete/) {
       my @url_components = @args;
       my %rest_params = ();
       # look for a hashref as final arg containing field => value pairs
@@ -210,6 +219,11 @@ sub __do_request {
 	%rest_params = %{ pop @url_components };
       }
       my $url = join('/',$self->{_actions}{$action},@url_components);
+      my @params;
+      while (my ($p,$v) = each %rest_params) {
+	push @params, join('=',$p,$v);
+      }
+      $url.='?'.join('&',@params) if @params;
       if ($self->batch_mode) {
 	$url = ($url_components[0] =~ /{[0-9]+}/) ? $url_components[0] : $url; # index batch object kludge
 
@@ -218,14 +232,16 @@ sub __do_request {
 	      $rq);
 	goto &_add_to_batch_queue; # short circuit to _add_to_batch_queue
       }
-      $resp = $self->$rq($url,%rest_params);
-    };
-    /post|put/ && do {
+      $resp = $self->$rq($url);
+    }
+    when (/post|put/) {
       my ($url_components, $content, $addl_headers) = @args;
       unless (!$addl_headers || (ref $addl_headers eq 'HASH')) {
 	REST::Neo4p::LocalException->throw("Arg 3 must be a hashref of additional headers\n");
       }
+      no warnings qw(uninitialized);
       my $url = join('/',$self->{_actions}{$action},@$url_components);
+      use warnings qw(uninitialized);
       if ($self->batch_mode) {
 	$url = ($url_components->[0] =~ /{[0-9]+}/) ? join('/',@$url_components) : $url; # index batch object kludge
 	@_ = ($self, 
@@ -235,50 +251,48 @@ sub __do_request {
       }
       $content = $JSON->encode($content) if $content;
       $resp  = $self->$rq($url, 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
-    };
-    do { # exception handling
-      # rt80471...
-      eval {
-	$self->{_decoded_content} = $JSON->decode($resp->content);
-      };
-      undef $self->{_decoded_content} if $@;
-      unless ($resp->is_success) {
-	if ( $self->{_decoded_content} ) {
-	  my %error_fields = (
-	    code => $resp->code,
-	    neo4j_message => $self->{_decoded_content}->{message},
-	    neo4j_exception => $self->{_decoded_content}->{exception},
-	    neo4j_stacktrace =>  $self->{_decoded_content}->{stacktrace}
-	   );
-	  my $xclass;
-	  if ($resp->code == 404) {
-	    $xclass = 'REST::Neo4p::NotFoundException';
-	  }
-	  elsif ($resp->code == 409) {
-	    $xclass = 'REST::Neo4p::ConflictException';
-	  }
-	  else {
-	    $xclass = 'REST::Neo4p::Neo4jException';
-	  }
-	  if ( $error_fields{neo4j_exception} && 
-		 ($error_fields{neo4j_exception} =~ /^Syntax/ )) {
-	    $xclass = 'REST::Neo4p::QuerySyntaxException';
-	  }
-	  $xclass->throw(%error_fields);
-	}
-	else { # couldn't parse the content as JSON...
-
-	  my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
-	  $xclass->throw( 
-	    code => $resp->code,
-	    message => $resp->message
-	   );
-	}
-      }
-      $self->{_location} = $resp->header('Location');
-      last;
-    };
+    }
   }
+  # exception handling
+  # rt80471...
+  eval {
+    $self->{_decoded_content} = $JSON->decode($resp->content);
+  };
+  undef $self->{_decoded_content} if $@;
+  unless ($resp->is_success) {
+    if ( $self->{_decoded_content} ) {
+      my %error_fields = (
+	code => $resp->code,
+	neo4j_message => $self->{_decoded_content}->{message},
+	neo4j_exception => $self->{_decoded_content}->{exception},
+	neo4j_stacktrace =>  $self->{_decoded_content}->{stacktrace}
+       );
+      my $xclass;
+      if ($resp->code == 404) {
+	$xclass = 'REST::Neo4p::NotFoundException';
+      }
+      elsif ($resp->code == 409) {
+	$xclass = 'REST::Neo4p::ConflictException';
+      }
+      else {
+	$xclass = 'REST::Neo4p::Neo4jException';
+      }
+      if ( $error_fields{neo4j_exception} && 
+	     ($error_fields{neo4j_exception} =~ /^Syntax/ )) {
+	$xclass = 'REST::Neo4p::QuerySyntaxException';
+      }
+      $xclass->throw(%error_fields);
+    }
+    else { # couldn't parse the content as JSON...
+      
+      my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
+      $xclass->throw( 
+	code => $resp->code,
+	message => $resp->message
+       );
+    }
+  }
+  $self->{_location} = $resp->header('Location');
 }
 
 sub DESTROY {}

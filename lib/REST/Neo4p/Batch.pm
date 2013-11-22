@@ -1,3 +1,4 @@
+#$Id: Batch.pm 291 2013-11-22 02:17:32Z maj $
 package REST::Neo4p::Batch;
 use REST::Neo4p::Exceptions;
 use JSON::Streaming::Reader;
@@ -6,6 +7,7 @@ require REST::Neo4p;
 use base qw(Exporter);
 use strict;
 use warnings;
+no warnings qw(once);
 
 BEGIN {
   $REST::Neo4p::Batch::VERSION = '0.2001';
@@ -16,9 +18,9 @@ our @BATCH_ACTIONS = qw(keep_objs discard_objs);
 
 sub batch (&@) {
   my ($coderef,$action) = @_;
-  my $agent = $REST::Neo4p::AGENT;
+  my $agent = REST::Neo4p->agent;
   my @errors;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $agent;
+  REST::Neo4p::CommException->throw("Not connected\n") unless REST::Neo4p->connected;
   warn 'Agent already in batch_mode on batch() call' if ($agent->batch_mode);
   $agent->batch_mode(1);
   $coderef->();

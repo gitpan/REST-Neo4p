@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 009_batch.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 009_batch.t 282 2013-11-16 04:06:03Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -38,7 +38,7 @@ SKIP : {
   my $rel;
   ok( !(
   batch {
-      ok $REST::Neo4p::AGENT->batch_mode, 'agent now in batch mode';
+      ok (REST::Neo4p->agent->batch_mode, 'agent now in batch mode');
       ok $idx = REST::Neo4p::Index->new(node => 'test_node'), 'make an index inside batch';
       my $name = "__test_node";
       my @names = map { $name.$_ } (1..10);
@@ -49,7 +49,7 @@ SKIP : {
       ok $rel =  $nodes[0]->relate_to($nodes[1], 'one2two'), 'create relationship inside batch';
   } ('keep_objs')
       ), 'batch ran without errors');
-  ok !$REST::Neo4p::AGENT->batch_mode, 'agent not now in batch mode';
+  ok !REST::Neo4p->agent->batch_mode, 'agent not now in batch mode';
   ok $idx = REST::Neo4p->get_index_by_name('test_node','node'), 'got index outside batch';
   ok !$idx->is_batch;
   $DB::single=1;

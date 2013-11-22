@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 005_db.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 005_db.t 284 2013-11-16 17:19:59Z maj $
 use Test::More tests => 32;
 use Test::Exception;
 use Module::Build;
@@ -78,9 +78,9 @@ SKIP : {
   
   ok $R->remove, 'remove relationship';
   ok !REST::Neo4p->get_relationship_by_id($$r12), 'relationship is gone';
-  lives_ok { $REST::Neo4p::AGENT->delete_node($$N) } 'delete node';
+  lives_ok { REST::Neo4p->agent->delete_node($$N) } 'delete node';
 #  ok $REST::Neo4p::AGENT->delete_relationship($$R);
-  lives_ok { $REST::Neo4p::AGENT->delete_node_index($$I) } 'delete node index';
+  lives_ok { REST::Neo4p->agent->delete_node_index($$I) } 'delete node index';
 }
 
 END {

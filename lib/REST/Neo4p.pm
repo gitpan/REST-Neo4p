@@ -1,28 +1,90 @@
-#$Id: Neo4p.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Neo4p.pm 291 2013-11-22 02:17:32Z maj $
+use v5.10;
 package REST::Neo4p;
-use strict;
-use warnings;
 use Carp qw(croak carp);
+use lib '../../lib';
+use JSON;
+use URI::Escape;
 use REST::Neo4p::Agent;
-use REST::Neo4p::Entity;
 use REST::Neo4p::Node;
-use REST::Neo4p::Relationship;
 use REST::Neo4p::Index;
 use REST::Neo4p::Query;
 use REST::Neo4p::Exceptions;
+use strict;
+use warnings;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2120';
+  $REST::Neo4p::VERSION = '0.2200';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
-our $AGENT;
+our @HANDLES;
+our $HANDLE = 0;
+my $json = JSON->new->allow_nonref(1);
+#our $AGENT;
+
+$HANDLES[0]->{_q_endpoint} = 'cypher';
+
+sub set_handle {
+  my $class = shift;
+  my ($i) = @_;
+  REST::Neo4p::LocalException->throw("Nonexistent handle '$i'") unless defined $HANDLES[$i];
+  $HANDLE=$i;
+}
+
+sub create_and_set_handle {
+  my $class = shift;
+  $HANDLE = @HANDLES;
+  $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new;
+  return $HANDLE;
+}
+
+sub disconnect_handle {
+  my $class = shift;
+  my ($i) = @_;
+  REST::Neo4p::LocalException->throw("Nonexistent handle '$i'") unless defined $HANDLES[$i];
+  delete $HANDLES[$i];
+  return 1;
+}
+
+sub _set_transaction {
+  my $class = shift;
+  my ($tx) = @_;
+  die "Bad transaction id" unless $tx =~ /^[0-9]+$/;
+  return $HANDLES[$HANDLE]->{_transaction} = $tx;
+}
+
+sub _transaction {
+  my $class = shift;
+  return $HANDLES[$HANDLE]->{_transaction};
+}
+
+sub _tx_errors {
+  my $class = shift;
+  return $HANDLES[$HANDLE]->{_tx_errors};
+}
+
+sub _clear_transaction {
+  my $class = shift;
+  delete $HANDLES[$HANDLE]->{_transaction}
+}
+
+sub q_endpoint { 
+  my $neo4p = shift;
+  return $HANDLES[$HANDLE]->{_q_endpoint};
+}
+
+sub handle {
+  my $neo4p = shift;
+  return $HANDLE;
+}
 
 sub agent {
-  my $class = shift;
-  unless (defined $AGENT) {
+  my $neo4p = shift;
+  unless (defined $HANDLES[$HANDLE]->{_agent}) {
     eval {
-      $AGENT = REST::Neo4p::Agent->new();
+#      $HANDLES[$HANDLE]->{_agent} = $AGENT = REST::Neo4p::Agent->new();
+      $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new();
     };
     if (my $e = REST::Neo4p::Exception->caught()) {
       # TODO : handle different classes
@@ -32,25 +94,30 @@ sub agent {
       ref $e ? $e->rethrow : die $e;
     }
   }
-  return $AGENT;
+  return $HANDLES[$HANDLE]->{_agent};
 }
 
 # connect($host_and_port)
 sub connect {
-  my $class = shift;
+  my $neo4p = shift;
   my ($server_address, $user, $pass) = @_;
   REST::Neo4p::LocalException->throw("Server address not set\n")  unless $server_address;
-  $class->agent->credentials($server_address,'',$user,$pass) if defined $user;
-  return 1 if $class->agent->connect($server_address);
-  return;
+  $neo4p->agent->credentials($server_address,'',$user,$pass) if defined $user;
+  my $connected = $neo4p->agent->connect($server_address);
+  return $HANDLES[$HANDLE]->{_connected} = $connected;
+}
+
+sub connected {
+  my $neo4p = shift;
+  return $HANDLES[$HANDLE]->{_connected};
 }
 
 # $node = REST::Neo4p->get_node_by_id($id)
 sub get_node_by_id {
-  my $class = shift;
+  my $neo4p = shift;
   my ($id) = @_;
   my $node;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   eval {
     $node = REST::Neo4p::Node->_entity_by_id($id);
   };
@@ -64,14 +131,20 @@ sub get_node_by_id {
 }
 
 sub get_nodes_by_label {
-  my $class = shift;
-  my ($label) = @_;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
+  my $neo4p = shift;
+  my ($label,$prop, $value) = @_;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   my $decoded_resp;
+  if ($value) {
+  $DB::single=1;    
+    $value = uri_escape($json->encode($value));
+  }
+
   eval {
 # following line should work, but doesn't yet (self-discovery issue)
-#    $decoded_resp = $AGENT->get_label($label, 'nodes');
-    $decoded_resp = $AGENT->get_data('label',$label,'nodes');
+#    $decoded_resp = $neo4p->agent->get_label($label, 'nodes');
+    $decoded_resp = $neo4p->agent->get_data('label',$label,'nodes',
+					   $prop ? {$prop => $value} : () );
     1;
   };
   if (my $e = REST::Neo4p::NotFoundException->caught()) {
@@ -90,10 +163,10 @@ sub get_nodes_by_label {
 
 # $reln = REST::Neo4p->get_relationship_by_id($id);
 sub get_relationship_by_id {
-  my $class = shift;
+  my $neo4p = shift;
   my ($id) = @_;
   my $relationship;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   eval {
     $relationship = REST::Neo4p::Relationship->_entity_by_id($id);
   };
@@ -107,7 +180,7 @@ sub get_relationship_by_id {
 }
 
 sub get_index_by_name {
-  my $class = shift;
+  my $neo4p = shift;
   my ($name, $type) = @_;
   if (grep /^$name$/, qw(node relationship)) {
     my $a = $name;
@@ -115,7 +188,7 @@ sub get_index_by_name {
     $type = $a;
   }
   my $idx;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   eval {
     $idx = REST::Neo4p::Index->_entity_by_id($name,$type);
   };
@@ -130,11 +203,11 @@ sub get_index_by_name {
 
 # @all_reln_types = REST::Neo4p->get_relationship_types
 sub get_relationship_types {
-  my $class = shift;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
+  my $neo4p = shift;
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   my $decoded_json;
   eval {
-    $decoded_json = $AGENT->get_relationship_types();
+    $decoded_json = $neo4p->agent->get_relationship_types();
   };
   my $e;
   if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
@@ -148,15 +221,15 @@ sub get_relationship_types {
 }
 
 sub get_indexes {
-  my $class = shift;
+  my $neo4p = shift;
   my ($type) = @_;
-  REST::Neo4p::CommException->throw("Not connected\n") unless $AGENT;
   unless ($type) {
     REST::Neo4p::LocalException->throw("Type argument (node or relationship) required\n");
   }
+  REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
   my $decoded_resp;
   eval {
-    $decoded_resp = $AGENT->get_data('index',$type);
+    $decoded_resp = $neo4p->agent->get_data('index',$type);
   };
   my $e;
   if ($e = Exception::Class->caught('REST::Neo4p::Exception')) {
@@ -176,6 +249,124 @@ sub get_indexes {
 
 sub get_node_indexes { shift->get_indexes('node',@_) }
 sub get_relationship_indexes { shift->get_indexes('relationship',@_) }
+
+sub begin_work {
+  my $neo4p = shift;
+  unless ($neo4p->_check_version(2,0,0,2)) {
+    REST::Neo4p::VersionMismatchException->throw("Transactions are not available in Neo4j server version < 2.0.0-M02\n");
+  }
+  if ($neo4p->_transaction) {
+    REST::Neo4p::TxException->throw("Transaction already initiated\n");
+  }
+  $HANDLES[$HANDLE]->{_old_endpoint} = $HANDLES[$HANDLE]->{_q_endpoint};
+  $HANDLES[$HANDLE]->{_q_endpoint} = 'transaction';
+  delete  $HANDLES[$HANDLE]->{_tx_errors};
+  my $resp;
+  eval {
+    $resp =  $neo4p->agent->post_transaction([]);
+    REST::Neo4p::Neo4jException->throw($resp->{errors}->[0]->{message}) 
+	if @{$resp->{errors}};
+  };
+  if (my $e = REST::Neo4p::Exception->caught()) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
+  }
+  my ($tx) = $resp->{commit} =~ m|.*/([0-9]+)/commit$|;
+  return REST::Neo4p->_set_transaction($tx);
+}
+
+sub commit {
+  my $neo4p = shift;
+  unless ($neo4p->_check_version(2,0,0,2)) {
+    REST::Neo4p::VersionMismatchException->throw("Transactions are not available in Neo4j server version < 2.0.0-M02\n");
+  }
+  return 1 if ($neo4p->q_endpoint eq 'cypher'); # noop, server autocommited
+  unless ($neo4p->q_endpoint eq 'transaction') {
+    REST::Neo4p::TxException->throw("Unknown REST endpoint '".$neo4p->q_endpoint."'\n");
+  }
+  $HANDLES[$HANDLE]->{_q_endpoint} = delete $HANDLES[$HANDLE]->{_old_endpoint};
+  my $resp;
+  eval {
+    $resp = $neo4p->agent->post_transaction(
+      [$neo4p->_transaction,'commit']
+     );
+  };
+  if (my $e = REST::Neo4p::Exception->caught()) {
+    # TODO : handle different classes
+    $e->rethrow;
+  }
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
+  }
+  $neo4p->_clear_transaction;
+  # got response, see if errors
+  $HANDLES[$HANDLE]->{_tx_errors} = $resp->{errors};
+  return !(scalar @{$resp->{errors}});
+}
+
+sub rollback {
+  my $neo4p = shift;
+  unless ($neo4p->_check_version(2,0,0,2)) {
+    REST::Neo4p::VersionMismatchException->throw("Transactions are not available in Neo4j server version < 2.0.0-M02\n");
+  }
+  if ($neo4p->q_endpoint eq 'cypher') {
+    REST::Neo4p::TxException->throw("Rollback attempted in auto-commit mode\n");
+  }
+  unless ($neo4p->q_endpoint eq 'transaction') {
+    REST::Neo4p::TxException->throw("Unknown REST endpoint '".$neo4p->q_endpoint."'\n");
+  }
+  $HANDLES[$HANDLE]->{_q_endpoint} = delete $HANDLES[$HANDLE]->{_old_endpoint};  eval {
+    $neo4p->agent->delete_transaction($neo4p->_transaction);
+  };
+  if (my $e = REST::Neo4p::Exception->caught()) {
+    # TODO : handle different classes
+    $DB::single=1;
+    $e->rethrow;
+  }
+  elsif ($e = Exception::Class->caught()) {
+    ref $e ? $e->rethrow : die $e;
+  }
+  return $neo4p->_clear_transaction;
+}
+
+sub neo4j_version {
+  my $neo4p = shift;
+  my $v = my $a = $neo4p->agent->{_actions}{neo4j_version};
+  return unless defined $v;
+  my ($major, $minor, $patch, $milestone) =
+    $a =~ /^(?:([0-9]+)\.)(?:([0-9]+)\.)?([0-9]+)?(?:-M([0-9]+))?/;
+  wantarray ? ($major,$minor,$patch,$milestone) : $v;
+}
+
+sub _check_version {
+  my $neo4p = shift;
+  my ($major, $minor, $patch, $milestone) = @_;
+  my ($M,$m,$p,$s) = $neo4p->neo4j_version;
+  my ($current, $requested);
+  $current = $requested = 0;
+  for ($M,$m,$p) {
+    $current += $_||0;
+    $current *= 100;
+  }
+  for ($major,$minor,$patch) {
+    $requested += $_||0;
+    $requested *= 100;
+  }
+  if (defined $milestone && defined $s) {
+    $current += $s;
+    $requested += $milestone;
+  }
+  return $requested <= $current;
+}
+
+sub DESTROY {
+  my $self = shift;
+  delete $HANDLES[$self->handle];
+  return;
+}
 
 =head1 NAME
 
@@ -312,17 +503,17 @@ L<REST::Neo4p::Constraint>.
 
 Returns the underlying L<REST::Neo4p::Agent> (which ISA L<LWP::UserAgent>).
 
+=item neo4j_version()
+
+ $version = REST::Neo4p->neo4j_version;
+
+Returns the server's neo4j version number, or undef if not connected.
+
 =item get_node_by_id()
 
  $node = REST::Neo4p->get_node_by_id( $id );
 
 Returns false if node C<$id> does not exist in database.
-
-=item get_nodes_by_label() B<Neo4j Server Version 2.0>
-
- @nodes = REST::Neo4p->get_nodes_by_label( $label );
-
-Returns false if no nodes with given label in database.
 
 =item get_relationship_by_id()
 
@@ -347,6 +538,55 @@ Returns false if index C<$name> does not exist in database.
  @node_indexes = REST::Neo4p->get_node_indexes;
  @relationship_indexes = REST::Neo4p->get_relationship_indexes;
 
+=back
+
+=head2 Label Support (Neo4j Server Version 2 only) 
+
+=over
+
+=item get_nodes_by_label()
+
+ @nodes = REST::Neo4p->get_nodes_by_label( $label );
+ @nodes = REST::Neo4p->get_nodes_by_label($label, $property => $value );
+
+Returns false if no nodes with given label in database.
+
+=item get_all_labels()
+
+ @graph_labels = REST::Neo4p->get_all_labels;
+
+=back
+
+=head2 Transaction Support (Neo4j Server Version 2 only)
+
+Initiate, commit, or rollback L<REST::Neo4p::Query|queries> in transactions.
+
+=over
+
+=item begin_work()
+
+=item commit()
+
+=item rollback()
+ 
+ $q = REST::Neo4p::Query->new(
+   'start n=node(0) match n-[r:pal]->m create r'
+ );
+ $r = REST::Neo4p::Query->new(
+    'start n=node(0) match n-[r:pal]->u create unique u'
+ );
+ REST::Neo4p->begin_work;
+ $q->execute;
+ $r->execute;
+ if ($q->err || $r->err) {
+   REST::Neo4p->rollback;
+ }
+ else {
+   REST::Neo4p->commit;
+   unless (REST::Neo4p->_tx_errors) {
+     print 'all queries successful';
+   }
+ }
 
 =back
 

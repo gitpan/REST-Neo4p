@@ -1,8 +1,7 @@
-#$Id: Index.pm 276 2013-11-09 23:45:30Z maj $#
+#$Id: Index.pm 285 2013-11-16 17:41:28Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
-use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use URI::Escape;
@@ -10,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2111';
+  $REST::Neo4p::Index::VERSION = '0.2200';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
@@ -79,8 +78,9 @@ sub add_entry {
   }
   my %entry_hash = (ref $entry_hash[0] eq 'HASH') ? 
 		      %{$entry_hash[0]} : @entry_hash;
-
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $rq = "post_".$self->_action;
   my $decoded_resp;
   while (my ($key, $value) = each %entry_hash) {
@@ -112,7 +112,9 @@ sub remove_entry {
      );
   }
   my @addl_components;
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $rq = 'delete_'.$self->_action;
   if (defined $key) {
     if (defined $value) {
@@ -147,7 +149,9 @@ sub find_entries {
   my ($key, $value) = @_;
   my ($query) = @_;
   my $decoded_resp;
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $rq = 'get_'.$self->_action;
   if ($value) { # exact key->value match
     eval {
@@ -210,7 +214,9 @@ sub create_unique_node {
   unless ( $on_found =~ /^get|fail$/ ) {
     REST::Neo4p::LocalException->throw("on_found parameter (4th arg) must be one of 'get', 'fail'\n");
   }
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $rq = "post_".$self->_action;
   my $restq = 'uniqueness='.($on_found eq 'get' ? 'get_or_create' : 'create_or_fail');
   my $decoded_resp;
@@ -254,7 +260,9 @@ sub create_unique_relationship {
   unless ( $on_found =~ /^get|fail$/ ) {
     REST::Neo4p::LocalException->throw("on_found parameter (7th arg) must be one of 'get', 'fail'\n");
   }
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $rq = "post_".$self->_action;
   my $restq = 'uniqueness='.($on_found eq 'get' ? 'get_or_create' : 'create_or_fail');
   my $decoded_resp;

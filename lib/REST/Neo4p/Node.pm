@@ -1,14 +1,14 @@
-#$Id: Node.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Node.pm 285 2013-11-16 17:41:28Z maj $
 package REST::Neo4p::Node;
+use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Relationship;
 use REST::Neo4p::Exceptions;
 use JSON;
 use Carp qw(croak carp);
-use base 'REST::Neo4p::Entity';
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2120';
+  $REST::Neo4p::Node::VERSION = '0.2200';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -20,7 +20,9 @@ BEGIN {
 sub relate_to {
   my $self = shift;
   my ($target_node, $rel_type, $rel_props) = @_;
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $suffix = $self->_get_url_suffix('create_relationship')
     || 'relationships'; # weak workaround
   my $content = {
@@ -52,7 +54,9 @@ sub get_relationships {
   my $self = shift;
   my ($direction) = @_;
   $direction ||= 'all';
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $action;
   for ($direction) {
     /^all$/ && do {
@@ -98,7 +102,12 @@ sub get_relationships {
 sub set_labels {
   my $self = shift;
   my @labels = @_;
-  my $agent = $REST::Neo4p::AGENT;
+  unless (REST::Neo4p->_check_version(2)) {
+    REST::Neo4p::VersionMismatchException->throw("set_labels requires neo4j v2.0 or greater");
+  }
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $decoded_resp;
   eval {
     $decoded_resp= $agent->put_node([$$self,'labels'],[@labels]);
@@ -117,7 +126,12 @@ sub set_labels {
 sub add_labels {
   my $self = shift;
   my @labels = @_;
-  my $agent = $REST::Neo4p::AGENT;
+  unless (REST::Neo4p->_check_version(2)) {
+    REST::Neo4p::VersionMismatchException->throw("add_labels requires neo4j v2.0 or greater");
+  }
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $decoded_resp;
   eval {
     $decoded_resp= $agent->post_node([$$self,'labels'],[@labels]);
@@ -135,7 +149,12 @@ sub add_labels {
 
 sub get_labels {
   my $self = shift;
-  my $agent = $REST::Neo4p::AGENT;
+  unless (REST::Neo4p->_check_version(2)) {
+    REST::Neo4p::VersionMismatchException->throw("get_labels requires neo4j v2.0 or greater");
+  }
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $decoded_resp;
   eval {
     $decoded_resp = $agent->get_node($$self, 'labels');
@@ -153,9 +172,14 @@ sub get_labels {
 
 sub drop_labels {
   my $self = shift;
+  unless (REST::Neo4p->_check_version(2)) {
+    REST::Neo4p::VersionMismatchException->throw("drop_labels requires neo4j v2.0 or greater");
+  }
   my @labels = @_;
   return $self unless @labels;
-  my $agent = $REST::Neo4p::AGENT;
+  local $REST::Neo4p::HANDLE;
+  REST::Neo4p->set_handle($self->_handle);
+  my $agent = REST::Neo4p->agent;
   my $decoded_resp;
   eval {
     foreach my $label (@labels) {

@@ -1,4 +1,4 @@
-#$Id: Build.PL 275 2013-11-09 23:32:36Z maj $
+#$Id: Build.PL 287 2013-11-18 03:19:05Z maj $
 use Module::Build;
 use strict;
 use warnings;
@@ -15,6 +15,7 @@ my $build =  Module::Build->new
 	'URI::Escape' => 3.3,
 	'LWP::UserAgent' => 6.04,
 	'Exception::Class' => 1.3,
+	'Tie::IxHash' => 0
        },
       configure_requires => {
 	'Module::Build' => 0
@@ -27,8 +28,8 @@ my $build =  Module::Build->new
        },
       build_recommends => {
 	 'Test::Pod' => 1.0
-	}
-      
+	},
+      perl => 5.010
     );
 
 $build->notes( test_server => $build->prompt("Server for live tests:", "http://127.0.0.1:7474"));

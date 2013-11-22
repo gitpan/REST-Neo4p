@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 008_batch_agent.t 275 2013-11-09 23:32:36Z maj $#
+#$Id: 008_batch_agent.t 284 2013-11-16 17:19:59Z maj $#
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -34,7 +34,7 @@ if ( my $e = REST::Neo4p::CommException->caught() ) {
 
 SKIP : {
   skip 'no local connection to neo4j', $num_live_tests if $not_connected;
-  ok my $agent = $REST::Neo4p::AGENT, 'got agent';
+  ok my $agent = REST::Neo4p->agent, 'got agent';
   throws_ok { $agent->batch_length } 'REST::Neo4p::LocalException', 'not in batch mode ok';
   ok $agent->batch_mode(1), 'set batch mode';
   ok !$agent->batch_length, 'queue empty';

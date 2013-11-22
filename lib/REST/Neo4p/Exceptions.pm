@@ -1,7 +1,7 @@
-#$Id: Exceptions.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Exceptions.pm 289 2013-11-21 13:06:13Z maj $
 package REST::Neo4p::Exceptions;
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.2020';
+  $REST::Neo4p::Exceptions::VERSION = '0.2200';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',
@@ -33,6 +33,12 @@ use Exception::Class (
 		'neo4j_exception', 'neo4j_stacktrace' ],
     description => 'Conflict (409) thrown when fail is specified for create_unique on indexes'
    },
+  'REST::Neo4p::TxQueryException' => 
+    {
+    isa => 'REST::Neo4p::Neo4jException',
+    fields => [qw/error_list message code/],
+    description => 'List of errors returned by query executed within a txn'
+   },
   'REST::Neo4p::QuerySyntaxException' =>
     {
       isa => 'REST::Neo4p::Neo4jException',
@@ -48,6 +54,10 @@ use Exception::Class (
     isa => 'REST::Neo4p::LocalException',
     description => 'Attempt to call a non-supported inherited method'
    },
+  'REST::Neo4p::TxException' => {
+    isa => 'REST::Neo4p::LocalException',
+    description => 'Problem with transaction building or execution'
+   },
   'REST::Neo4p::AbstractMethodException' => {
     isa => 'REST::Neo4p::LocalException',
     description => 'Attempt to call a subclass-only method from a parent class'
@@ -56,6 +66,11 @@ use Exception::Class (
     isa => 'REST::Neo4p::LocalException',
     message => 'This is a class method only',
     description => 'Attempt to call a class method from an instance'
+   },
+  'REST::Neo4p::VersionMismatchException' => {
+    isa => 'REST::Neo4p::LocalException',
+    message => 'This feature is not supported in your neo4j server version',
+    description => 'Use of features only implemented in a more recent neo4j version'
    },
   'REST::Neo4p::QueryResponseException' => {
     isa => 'REST::Neo4p::LocalException',
