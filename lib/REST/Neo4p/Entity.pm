@@ -1,4 +1,4 @@
-#$Id: Entity.pm 285 2013-11-16 17:41:28Z maj $
+#$Id: Entity.pm 296 2013-11-30 04:55:18Z maj $
 use v5.10;
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
