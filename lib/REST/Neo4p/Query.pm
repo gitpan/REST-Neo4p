@@ -1,4 +1,4 @@
-#$Id: Query.pm 296 2013-11-30 04:55:18Z maj $
+#$Id: Query.pm 300 2013-12-02 23:41:41Z maj $
 use v5.10;
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
