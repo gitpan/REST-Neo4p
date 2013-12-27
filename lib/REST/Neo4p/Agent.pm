@@ -1,4 +1,4 @@
-#$Id: Agent.pm 291 2013-11-22 02:17:32Z maj $
+#$Id: Agent.pm 315 2013-12-27 01:52:16Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
@@ -11,12 +11,12 @@ use warnings;
 
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2200';
+  $REST::Neo4p::Agent::VERSION = '0.2230';
 }
 
 our $AUTOLOAD;
 our $JOB_CHUNK = 1024;
-our $JSON = JSON->new()->allow_nonref(1);
+our $JSON = JSON->new()->allow_nonref(1)->utf8;
 our $RQ_RETRIES = 3;
 our $RETRY_WAIT = 5;
 sub new {

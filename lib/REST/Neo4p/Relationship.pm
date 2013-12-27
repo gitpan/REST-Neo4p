@@ -1,4 +1,4 @@
-#$Id: Relationship.pm 283 2013-11-16 15:49:48Z maj $
+#$Id: Relationship.pm 315 2013-12-27 01:52:16Z maj $
 package REST::Neo4p::Relationship;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Exceptions;
@@ -6,7 +6,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Relationship::VERSION = '0.2200';
+  $REST::Neo4p::Relationship::VERSION = '0.2230';
 }
 
 sub new {
@@ -109,6 +109,13 @@ Sets values of properties on nodes and relationships.
  print "Come here often?" if ($props->{status} eq 'not_currently_seeing');
 
 Get all the properties of relationship as a hashref.
+
+=item remove_property()
+
+ $relationship->remove_property('name');
+ $relationship->remove_property(@property_names);
+
+Remove properties from relationship.
 
 =item start_node(), end_node()
 

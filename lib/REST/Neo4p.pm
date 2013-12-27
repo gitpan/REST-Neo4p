@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 300 2013-12-02 23:41:41Z maj $
+#$Id: Neo4p.pm 315 2013-12-27 01:52:16Z maj $
 use v5.10;
 package REST::Neo4p;
 use Carp qw(croak carp);
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2222';
+  $REST::Neo4p::VERSION = '0.2230';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;

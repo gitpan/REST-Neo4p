@@ -1,4 +1,4 @@
-#$Id: Build.PL 287 2013-11-18 03:19:05Z maj $
+#$Id: Build.PL 316 2013-12-27 02:20:56Z maj $
 use Module::Build;
 use strict;
 use warnings;
