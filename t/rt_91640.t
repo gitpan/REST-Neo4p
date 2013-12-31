@@ -1,4 +1,4 @@
-#$Id$
+#$Id: rt_91640.t 323 2013-12-31 22:45:43Z maj $
 use utf8;
 use Test::More tests => 27;
 use Test::Exception;

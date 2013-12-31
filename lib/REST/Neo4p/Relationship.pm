@@ -1,4 +1,4 @@
-#$Id: Relationship.pm 315 2013-12-27 01:52:16Z maj $
+#$Id: Relationship.pm 317 2013-12-30 20:39:25Z maj $
 package REST::Neo4p::Relationship;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Exceptions;

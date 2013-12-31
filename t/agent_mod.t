@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id$
+#$Id: agent_mod.t 323 2013-12-31 22:45:43Z maj $
 use Test::More;
 use Module::Build;
 use lib '../lib';

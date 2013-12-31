@@ -1,4 +1,4 @@
-#$Id: 0041_idx_create_unique.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 0041_idx_create_unique.t 323 2013-12-31 22:45:43Z maj $
 use Test::More tests => 24;
 use Module::Build;
 use lib '../lib';
