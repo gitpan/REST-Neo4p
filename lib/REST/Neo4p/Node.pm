@@ -1,4 +1,4 @@
-#$Id: Node.pm 317 2013-12-30 20:39:25Z maj $
+#$Id: Node.pm 347 2014-02-12 02:47:40Z maj $
 package REST::Neo4p::Node;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Relationship;
@@ -8,7 +8,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2230';
+  $REST::Neo4p::Node::VERSION = '0.2240';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -372,7 +372,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Index>.
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

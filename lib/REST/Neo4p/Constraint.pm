@@ -1,4 +1,4 @@
-#$Id: Constraint.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Constraint.pm 347 2014-02-12 02:47:40Z maj $
 package REST::Neo4p::Constraint;
 use base 'Exporter';
 use REST::Neo4p;
@@ -34,7 +34,7 @@ my $regex_to_json = sub {
 };
 
 BEGIN {
-  $REST::Neo4p::Constraint::VERSION = '0.2001';
+  $REST::Neo4p::Constraint::VERSION = '0.2240';
 }
 
 # valid constraint types
@@ -498,7 +498,7 @@ L<REST::Neo4p::Constraint::RelationshipType>. L<REST::Neo4p::Node>, L<REST::Neo4
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

@@ -1,4 +1,4 @@
-#$Id: rt_91748.t 323 2013-12-31 22:45:43Z maj $
+#$Id: rt_91748.t 331 2014-01-04 22:40:53Z maj $
 use Test::More tests => 2;
 use Test::Exception;
 use Module::Build;

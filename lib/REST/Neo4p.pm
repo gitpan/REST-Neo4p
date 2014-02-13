@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 326 2014-01-01 00:45:50Z maj $
+#$Id: Neo4p.pm 348 2014-02-13 05:05:44Z maj $
 use v5.10;
 package REST::Neo4p;
 use Carp qw(croak carp);
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2233';
+  $REST::Neo4p::VERSION = '0.2240';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -106,7 +106,6 @@ sub agent {
   my $neo4p = shift;
   unless (defined $HANDLES[$HANDLE]->{_agent}) {
     eval {
-#      $HANDLES[$HANDLE]->{_agent} = $AGENT = REST::Neo4p::Agent->new();
       $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new();
     };
     if (my $e = REST::Neo4p::Exception->caught()) {
@@ -189,7 +188,6 @@ sub get_all_labels {
   return @{ $neo4p->agent->get_data('labels') };
 }
 
-# $reln = REST::Neo4p->get_relationship_by_id($id);
 sub get_relationship_by_id {
   my $neo4p = shift;
   my ($id) = @_;
@@ -229,7 +227,6 @@ sub get_index_by_name {
   return $idx;
 }
 
-# @all_reln_types = REST::Neo4p->get_relationship_types
 sub get_relationship_types {
   my $neo4p = shift;
   REST::Neo4p::CommException->throw("Not connected\n") unless $neo4p->connected;
@@ -644,7 +641,7 @@ L<REST::Neo4p::Constrain>, L<REST::Neo4p::Constraint>.
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

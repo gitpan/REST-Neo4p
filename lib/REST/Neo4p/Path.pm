@@ -1,11 +1,11 @@
-#$Id: Path.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Path.pm 347 2014-02-12 02:47:40Z maj $
 package REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Path::VERSION = '0.2120';
+  $REST::Neo4p::Path::VERSION = '0.2240';
 }
 
 sub new {
@@ -144,7 +144,7 @@ L<REST::Neo4p::Query>.
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

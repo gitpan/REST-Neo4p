@@ -1,4 +1,4 @@
-#$Id: Constrain.pm 276 2013-11-09 23:45:30Z maj $
+#$Id: Constrain.pm 347 2014-02-12 02:47:40Z maj $
 package REST::Neo4p::Constrain;
 use base 'Exporter';
 use REST::Neo4p::Constraint qw(:all);
@@ -9,7 +9,7 @@ no warnings qw(once redefine);
 
 
 BEGIN {
-  $REST::Neo4p::Constrain::VERSION = '0.2002';
+  $REST::Neo4p::Constrain::VERSION = '0.2240';
 }
 our @EXPORT = qw(create_constraint drop_constraint constrain relax);
 our @VALIDATE = qw(validate_properties validate_relationship validate_relationship_type);
@@ -792,7 +792,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Constraint>
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

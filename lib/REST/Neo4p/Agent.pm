@@ -1,4 +1,4 @@
-#$Id: Agent.pm 317 2013-12-30 20:39:25Z maj $
+#$Id: Agent.pm 347 2014-02-12 02:47:40Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use base LWP::UserAgent;
@@ -11,7 +11,7 @@ use warnings;
 
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2230';
+  $REST::Neo4p::Agent::VERSION = '0.2240';
 }
 
 our $AUTOLOAD;
@@ -560,7 +560,7 @@ has default value of 1024.
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 

@@ -1,4 +1,4 @@
-#$Id: Index.pm 322 2013-12-31 22:41:31Z maj $#
+#$Id: Index.pm 347 2014-02-12 02:47:40Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2231';
+  $REST::Neo4p::Index::VERSION = '0.2240';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
@@ -419,7 +419,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Node>.
 
 =head1 LICENSE
 
-Copyright (c) 2012-2013 Mark A. Jensen. This program is free software; you
+Copyright (c) 2012-2014 Mark A. Jensen. This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl
 itself.
 
