@@ -1,4 +1,4 @@
-#$Id: 041_v2_txns.t 327 2014-01-01 18:02:08Z maj $
+#$Id: 041_v2_txns.t 354 2014-02-17 05:22:50Z maj $
 use Test::More tests => 29;
 use Test::Exception;
 use Module::Build;
@@ -69,7 +69,7 @@ STMT3
   is @r, 4, '4 relationships before execute';
   ok my $q = REST::Neo4p::Query->new($stmt1), 'statement 1';
   $q->{RaiseError} = 1;
-  ok my $rc = $q->execute, 'execute statment 1';
+  ok defined $q->execute, 'execute statment 1';
   is @r, 4, 'executed, but still only 4 relationships';
   ok $neo4p->commit, 'commit';
   ok !$neo4p->_transaction, 'transaction cleared';
@@ -83,16 +83,16 @@ STMT3
   ($m) = $t->nix->find_entries(name => 'he');
   is scalar $m->get_relationships, 1, 'he has 1 relationship';
   ok $neo4p->begin_work, 'begin transaction';
-  ok $rc = $q->execute(name => 'she'), 'exec stmt 2';
-  ok $rc = $w->execute, 'exec stmt 3';
+  ok defined $q->execute(name => 'she'), 'exec stmt 2';
+  ok defined $w->execute, 'exec stmt 3';
   is scalar $m->get_relationships, 1, 'he has 1 relationship before rollback';
   ok $neo4p->rollback, 'rollback';
   ok !$neo4p->_transaction, 'transaction cleared';
   is $neo4p->q_endpoint, 'cypher', 'endpoint reset to cypher';
   is scalar $m->get_relationships, 1, 'he has 1 relationship before rollback';
   ok $neo4p->begin_work, 'begin transaction';
-  ok $rc = $q->execute(name => 'she'), 'exec stmt 2';
-  ok $rc = $w->execute, 'exec stmt 3';
+  ok defined $q->execute(name => 'she'), 'exec stmt 2';
+  ok defined $w->execute, 'exec stmt 3';
   my $row = $w->fetch;
   is_deeply $row, [ { name => 'Fred', uuid => $uuid }, 'Fred' ], 'check simple txn row return';
   ok $neo4p->commit, 'commit';

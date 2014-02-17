@@ -1,7 +1,7 @@
-#$Id: Exceptions.pm 347 2014-02-12 02:47:40Z maj $
+#$Id: Exceptions.pm 354 2014-02-17 05:22:50Z maj $
 package REST::Neo4p::Exceptions;
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.2240';
+  $REST::Neo4p::Exceptions::VERSION = '0.2241';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',
@@ -76,6 +76,10 @@ use Exception::Class (
   'REST::Neo4p::QueryResponseException' => {
     isa => 'REST::Neo4p::LocalException',
     description => 'Problem parsing the response to a cypher query (prob. a bug)'
+   },
+  'REST::Neo4p::EmptyQueryResponseException' => {
+    isa => 'REST::Neo4p::LocalException',
+    description => 'The server response body was empty; connection problem?'
    },
   'REST::Neo4p::ConstraintException' => {
     isa => 'REST::Neo4p::LocalException',

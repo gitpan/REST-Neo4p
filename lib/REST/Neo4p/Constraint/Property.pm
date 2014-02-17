@@ -1,11 +1,11 @@
-#$Id: Property.pm 347 2014-02-12 02:47:40Z maj $
+#$Id: Property.pm 354 2014-02-17 05:22:50Z maj $
 package REST::Neo4p::Constraint::Property;
 use base 'REST::Neo4p::Constraint';
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Constraint::Property::VERSION = '0.2240';
+  $REST::Neo4p::Constraint::Property::VERSION = '0.2241';
 }
 
 sub new_from_constraint_hash {
