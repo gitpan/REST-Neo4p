@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 011_neo4p_synopsis.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 011_neo4p_synopsis.t 419 2014-05-10 20:10:23Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -13,6 +13,7 @@ use_ok('REST::Neo4p');
 my $build;
 my ($user,$pass);
 
+#$SIG{__DIE__} = sub { print $_[0] };
 eval {
   $build = Module::Build->current;
   $user = $build->notes('user');

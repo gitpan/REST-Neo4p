@@ -1,4 +1,4 @@
-#$Id: rt_91640.t 327 2014-01-01 18:02:08Z maj $
+#$Id: rt_91640.t 415 2014-05-05 03:00:37Z maj $
 use utf8;
 use Test::More tests => 27;
 use Test::Exception;

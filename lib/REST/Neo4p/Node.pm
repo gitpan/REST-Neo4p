@@ -1,4 +1,4 @@
-#$Id: Node.pm 354 2014-02-17 05:22:50Z maj $
+#$Id: Node.pm 421 2014-05-10 22:53:01Z maj $
 package REST::Neo4p::Node;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Relationship;
@@ -8,7 +8,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2242';
+  $REST::Neo4p::Node::VERSION = '0.2250';
 }
 
 # creation, deletion and property manipulation are delegated
@@ -366,9 +366,7 @@ L<REST::Neo4p>, L<REST::Neo4p::Relationship>, L<REST::Neo4p::Index>.
 
     Mark A. Jensen
     CPAN ID: MAJENSEN
-    TCGA DCC
-    mark -dot- jensen -at- nih -dot- gov
-    http://tcga-data.nci.nih.gov
+    majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

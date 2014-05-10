@@ -1,4 +1,4 @@
-#$Id: rt_92135.t 348 2014-02-13 05:05:44Z maj $
+#$Id: rt_92135.t 415 2014-05-05 03:00:37Z maj $
 use Test::More tests => 6;
 use Module::Build;
 use lib '../lib';

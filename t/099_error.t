@@ -1,4 +1,4 @@
-#$Id: 099_error.t 327 2014-01-01 18:02:08Z maj $
+#$Id: 099_error.t 415 2014-05-05 03:00:37Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;
@@ -48,7 +48,9 @@ SKIP : {
     is $@->code, 404, '404 ok';
     my $q = REST::Neo4p::Query->new("Start n=frleb RETUN q");
     $q->{RaiseError} = 1;
-    throws_ok { $q->execute } 'REST::Neo4p::QuerySyntaxException', 'bad query syntax ok';
+    throws_ok { 
+      $q->execute
+    } 'REST::Neo4p::QuerySyntaxException', 'bad query syntax ok';
     $q->{RaiseError} = 0;
     lives_ok { $q->execute } 'no throw with RaiseError cleared';
     is $q->err, 400, 'but err code captured in err()';

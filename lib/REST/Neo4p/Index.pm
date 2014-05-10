@@ -1,4 +1,4 @@
-#$Id: Index.pm 354 2014-02-17 05:22:50Z maj $#
+#$Id: Index.pm 421 2014-05-10 22:53:01Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Node;
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2242';
+  $REST::Neo4p::Index::VERSION = '0.2250';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
@@ -386,7 +386,7 @@ B<CAUTION>: This method removes the index from the database and destroys the obj
 In the first form, an exact match is sought. In the second (i.e., when
 a single string argument is passed), the argument is interpreted as a
 query string and passed to the index as such. The Neo4j default is
-L<Lucene|http://lucene.apache.org/core/old_versioned_docs/versions/3_5_0/queryparsersyntax.html>.
+L<Lucene|http://lucene.apache.org/core/3_5_0/queryparsersyntax.html>.
 
 C<find_entries()> is not supported in batch mode.
 

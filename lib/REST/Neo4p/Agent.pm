@@ -1,7 +1,6 @@
-#$Id: Agent.pm 354 2014-02-17 05:22:50Z maj $
+#$Id: Agent.pm 421 2014-05-10 22:53:01Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
-use base LWP::UserAgent;
 use REST::Neo4p::Exceptions;
 use File::Temp qw(tempfile);
 use JSON;
@@ -9,9 +8,10 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 
+our @ISA;
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2242';
+  $REST::Neo4p::Agent::VERSION = '0.2250';
 }
 
 our $AUTOLOAD;
@@ -21,16 +21,21 @@ our $RQ_RETRIES = 3;
 our $RETRY_WAIT = 5;
 sub new {
   my $class = shift;
-  my $self = $class->SUPER::new(@_);
+  my %args = @_;
+  my $mod = delete $args{agent_module};
+  die "No user agent module specified" unless $mod;
+  $mod = join('::','REST::Neo4p::Agent',$mod);
+  eval "require $mod;1" or REST::Neo4p::LocalException->throw("Module $mod is not available\n");
+  my $self = $mod->new(@_);
   $self->agent("Neo4p/$VERSION");
   $self->default_header( 'Accept' => 'application/json' );
   $self->default_header( 'Content-Type' => 'application/json' );
   $self->default_header( 'X-Stream' => 'true' );
   $self->protocols_allowed( ['http','https'] );
-  bless $self, $class;
+  return $self;
 }
 
-sub server {
+sub server_url {
   my $self = shift;
   $self->{__server} = shift if @_;
   return $self->{__server};
@@ -49,13 +54,14 @@ sub batch_length{
 }
 
 sub connect {
+
   my $self = shift;
   my ($server) = @_;
   $self->{__server} = $server if defined $server;
-  unless ($self->server) {
+  unless ($self->server_url) {
     REST::Neo4p::Exception->throw("Server not set\n");
    }
-  my $resp = $self->get($self->server);
+  my $resp = $self->get($self->server_url);
   unless ($resp->is_success) {
     REST::Neo4p::CommException->throw( code => $resp->code,
 				       message => $resp->message );
@@ -140,6 +146,7 @@ sub execute_batch {
 
 sub execute_batch_chunk { shift->execute_batch($JOB_CHUNK) }
 
+sub raw_response { shift->{_raw_response} }
 # contains a reference to the returned content, as decoded by JSON
 sub decoded_content { shift->{_decoded_content} }
 # contains the url representation of the node returned in the Location:
@@ -148,21 +155,8 @@ sub location { shift->{_location} }
 
 sub available_actions { keys %{shift->{_actions}} }
 
-sub no_stream {
-  my $self = shift;
-  my $default_headers = $self->default_headers;
-  $default_headers->remove_header('X-Stream');
-  $self->default_headers($default_headers);
-}
-
-sub stream {
-  my $self = shift;
-  my $default_headers = $self->default_headers;
-  unless ($default_headers->header('X-Stream')) {
-    $default_headers->header('X-Stream' => 'true');
-  }
-  $self->default_headers($default_headers);
-}
+sub no_stream { shift->remove_header('X-Stream') }
+sub stream { shift->add_header('X-Stream' => 'true') }
 
 # autoload getters for discovered neo4j rest urls
 
@@ -208,7 +202,7 @@ sub AUTOLOAD {
 sub __do_request {
   my $self = shift;
   my ($rq, $action, @args) = @_;
-  $self->{_errmsg} = $self->{_location} = $self->{_decoded_content} = undef;
+  $self->{_errmsg} = $self->{_location} = $self->{_raw_response} = $self->{_decoded_content} = undef;
   my $resp;
   given ($rq) {
     when (/get|delete/) {
@@ -232,7 +226,7 @@ sub __do_request {
 	      $rq);
 	goto &_add_to_batch_queue; # short circuit to _add_to_batch_queue
       }
-      $resp = $self->$rq($url);
+      $resp = $self->{_raw_response} = $self->$rq($url);
     }
     when (/post|put/) {
       my ($url_components, $content, $addl_headers) = @args;
@@ -249,9 +243,8 @@ sub __do_request {
 	      $rq, $content, $addl_headers);
 	goto &_add_to_batch_queue;
       }
-      $content = $JSON->encode($content) if $content;
-      $resp  = $self->$rq($url, 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
-#      $DB::single=1;
+      $content = $JSON->encode($content) if $content && !$self->isa('Mojo::UserAgent');
+      $resp  = $self->{_raw_response} = $self->$rq($url, 'Content-Type' => 'application/json', Content=> $content, %$addl_headers);
       1;
     }
   }
@@ -271,14 +264,16 @@ sub __do_request {
 	neo4j_stacktrace =>  $self->{_decoded_content}->{stacktrace}
        );
       my $xclass;
-      if ($resp->code == 404) {
-	$xclass = 'REST::Neo4p::NotFoundException';
-      }
-      elsif ($resp->code == 409) {
-	$xclass = 'REST::Neo4p::ConflictException';
-      }
-      else {
-	$xclass = 'REST::Neo4p::Neo4jException';
+      given ($resp->code) {
+	when (404) {
+	  $xclass = 'REST::Neo4p::NotFoundException';
+	}
+	when (409) {
+	  $xclass = 'REST::Neo4p::ConflictException';
+	}
+	default {
+	  $xclass = 'REST::Neo4p::Neo4jException';
+	}
       }
       if ( $error_fields{neo4j_exception} && 
 	     ($error_fields{neo4j_exception} =~ /^Syntax/ )) {
@@ -287,8 +282,8 @@ sub __do_request {
       $xclass->throw(%error_fields);
     }
     else { # couldn't parse the content as JSON...
-      
-      my $xclass = ($resp->code == 404) ? 'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
+      my $xclass = ($resp->code && ($resp->code == 404)) ? 
+	'REST::Neo4p::NotFoundException' : 'REST::Neo4p::CommException';
       $xclass->throw( 
 	code => $resp->code,
 	message => $resp->message
@@ -307,7 +302,7 @@ REST::Neo4p::Agent - LWP client interacting with Neo4j
 =head1 SYNOPSIS
 
  $agent = REST::Neo4p::Agent->new();
- $agent->server('http://127.0.0.1:7474');
+ $agent->server_url('http://127.0.0.1:7474');
  unless ($agent->connect) {
   print STDERR "Didn't find the server\n";
  }
@@ -317,18 +312,30 @@ See examples under L</METHODS> below.
 =head1 DESCRIPTION
 
 The agent's job is to encapsulate and connect to the REST service URLs
-of a running neo4j server. It also stores the discovered URLs for
-various actions.  and provides those URLs as getters from the agent
+of a running Neo4j server. It also stores the discovered URLs for
+various actions and provides those URLs as getters from the agent
 object. The getter names are the keys in the JSON objects returned by
 the server. See
-L<http://docs.neo4j.org/chunked/milestone/rest-api.html> for more
+L<the Neo4j docs|http://docs.neo4j.org/chunked/stable/rest-api.html> for more
 details.
 
 API and HTTP errors are distinguished and thrown by
 L<Exception::Class> subclasses. See L<REST::Neo4p::Exceptions>.
 
-REST::Neo4p::Agent is a subclass of L<LWP::UserAgent|LWP::UserAgent>
-and inherits its capabilities.
+A REST::Neo4p::Agent instance is created as a subclass of a choice
+of HTTP user agents:
+
+=over
+
+=item * L<LWP::UserAgent> (default)
+
+=item * L<Mojo::UserAgent>
+
+=item * L<HTTP::Thin> (L<HTTP::Tiny> with L<HTTP::Response> responses)
+
+=back
+
+REST::Neo4p::Agent responses are always L<HTTP::Response> objects.
 
 REST::Neo4p::Agent will retry requests that fail with
 L<REST::Neo4p::CommException|REST::Neo4p::Exceptions>. The default
@@ -341,19 +348,23 @@ sec. These can be adjusted by setting the package variables
 to the desired values.
 
 According to the Neo4j recommendation, the agent requests streamed
-responses by default (i.e.,
+responses by default; i.e.,
 
- X-Stream:true
+ X-Stream: true
 
-is a default header. This can be removed by calling
+is a default header for requests. The server responds to requests with
+chunked content, which is handled correctly by any of the underlying
+user agents.
+
+Streaming can be stopped by calling
 
  $agent->no_stream
 
-and added back with 
+and started with
 
  $agent->stream
 
-For batch API experimental features, see L</Batch Mode>.
+For batch API features, see L</Batch Mode>.
 
 =head1 METHODS
 
@@ -362,13 +373,21 @@ For batch API experimental features, see L</Batch Mode>.
 =item new()
 
  $agent = REST::Neo4p::Agent->new();
+ $agent = REST::Neo4p::Agent->new( agent_module => 'HTTP::Thin');
  $agent = REST::Neo4p::Agent->new("http://127.0.0.1:7474");
 
-Returns a new agent. Accepts optional server address arg.
+Returns a new agent. The C<agent_module> parameter may be set to
 
-=item server()
+ LWP::UserAgent (default)
+ Mojo::UserAgent
+ HTTP::Thin
 
- $agent->server("http://127.0.0.1:7474");
+to select the underlying user agent class. Additional arguments are
+passed to the user agent constructor.
+
+=item server_url()
+
+ $agent->server_url("http://127.0.0.1:7474");
 
 Sets the server address and port.
 
@@ -415,7 +434,7 @@ methods to make requests directly.
 
  $version = $agent->neo4j_version;
 
-Returns the version of the connected Neo4j server.
+Returns the version string of the connected Neo4j server.
 
 =item available_actions()
 
@@ -473,13 +492,20 @@ Makes a DELETE request to the REST endpoint mapped to {action}. Arguments
 are additional URL components (without slashes). If the final argument
 is a hashref, it will be sent in the request as (encoded) JSON content.
 
-=item decoded_response()
+=item decoded_content()
 
- $decoded_json = $agent->decoded_response;
+ $decoded_json = $agent->decoded_content;
 
 Returns the response content of the last agent request, as decoded by
 L<JSON|JSON>. It is generally a reference, but can be a scalar if a
 bareword was returned by the server.
+
+=item raw_response()
+
+ $resp = $agent->raw_response
+
+Returns the L<HTTP::Response> object returned by the last request made
+by the backend user agent.
 
 =item no_stream()
 

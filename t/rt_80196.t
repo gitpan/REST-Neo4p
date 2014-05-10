@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: rt_80196.t 275 2013-11-09 23:32:36Z maj $
+#$Id: rt_80196.t 415 2014-05-05 03:00:37Z maj $
 use Test::More tests => 3;
 use Test::Exception;
 use Module::Build;

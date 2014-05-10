@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: agent_mod.t 327 2014-01-01 18:02:08Z maj $
+#$Id: agent_mod.t 415 2014-05-05 03:00:37Z maj $
 use Test::More;
 use Module::Build;
 use lib '../lib';
@@ -7,6 +7,7 @@ use strict;
 use warnings;
 
 no warnings qw(once);
+
 my $build;
 my ($user,$pass);
 
@@ -38,7 +39,7 @@ SKIP : {
       REST::Neo4p->connect('http://www.zzyxx.foo:7474');
     };
     if ( my $e = REST::Neo4p::CommException->caught() ) {
-      like $e->message, qr/timeout|Bad hostname/, 'timed out ok';
+      like $e->message, qr/Not Found|timeout|Bad hostname/, 'timed out ok';
     }
     is $agent1, $agent2, 'same agent';
 

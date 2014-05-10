@@ -1,4 +1,4 @@
-#$Id: 041_v2_txns.t 354 2014-02-17 05:22:50Z maj $
+#$Id: 041_v2_txns.t 415 2014-05-05 03:00:37Z maj $
 use Test::More tests => 29;
 use Test::Exception;
 use Module::Build;
@@ -12,6 +12,7 @@ use warnings;
 no warnings qw(once);
 my @cleanup;
 
+#$SIG{__DIE__} = sub { print $_[0] };
 my $build;
 my ($user,$pass);
 

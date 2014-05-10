@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 020_constraint.t 49 2012-11-28 04:57:40Z maj $
+#$Id: 020_constraint.t 415 2014-05-05 03:00:37Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;

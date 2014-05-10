@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 006_query.t 292 2013-11-22 04:21:20Z maj $
+#$Id: 006_query.t 417 2014-05-10 01:59:37Z maj $
 use Test::More;
 use Test::Exception;
 use Module::Build;
@@ -10,6 +10,7 @@ no warnings qw(once);
 my @cleanup;
 use_ok('REST::Neo4p');
 
+$SIG{__DIE__} = sub { if (ref $_[0]) { $_[0]->rethrow } else { print $_[0] }};
 my $build;
 my ($user,$pass);
 

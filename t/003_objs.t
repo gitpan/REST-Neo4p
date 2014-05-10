@@ -1,10 +1,12 @@
 #-*-perl-*-
-#$Id: 003_objs.t 275 2013-11-09 23:32:36Z maj $
+#$Id: 003_objs.t 419 2014-05-10 20:10:23Z maj $
 use Test::More tests => 35;
 use Module::Build;
 use lib '../lib';
 use strict;
 use warnings;
+
+#$SIG{__DIE__} = sub { print $_[0] };
 
 no warnings qw(once);
 my $build;
@@ -22,6 +24,7 @@ my $num_live_tests = 34;
 use_ok('REST::Neo4p');
 
 my $not_connected;
+
 eval {
   REST::Neo4p->connect($TEST_SERVER,$user,$pass);
 };

@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 354 2014-02-17 05:22:50Z maj $
+#$Id: Neo4p.pm 421 2014-05-10 22:53:01Z maj $
 use v5.10;
 package REST::Neo4p;
 use Carp qw(croak carp);
@@ -14,12 +14,14 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.2242';
+  $REST::Neo4p::VERSION = '0.2250';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
 our @HANDLES;
 our $HANDLE = 0;
+our $AGENT_MODULE = $ENV{REST_NEO4P_AGENT_MODULE} || 'LWP::UserAgent';
+
 my $json = JSON->new->allow_nonref(1);
 
 $HANDLES[0]->{_q_endpoint} = 'cypher';
@@ -34,7 +36,7 @@ sub set_handle {
 sub create_and_set_handle {
   my $class = shift;
   $HANDLE = @HANDLES;
-  $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new;
+  $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new(agent_module => $AGENT_MODULE);
   $HANDLES[$HANDLE]->{_q_endpoint} = 'cypher';
   return $HANDLE;
 }
@@ -106,7 +108,7 @@ sub agent {
   my $neo4p = shift;
   unless (defined $HANDLES[$HANDLE]->{_agent}) {
     eval {
-      $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new();
+      $HANDLES[$HANDLE]->{_agent} = REST::Neo4p::Agent->new(agent_module => $AGENT_MODULE);
     };
     if (my $e = REST::Neo4p::Exception->caught()) {
       # TODO : handle different classes
@@ -468,6 +470,7 @@ Actions on class instances have a corresponding effect on the database
 (i.e., REST::Neo4p approximates an ORM).
 
 The class L<REST::Neo4p::Query> provides a DBIesqe Cypher query facility.
+(And see also L<DBD::Neo4p>.)
 
 =head2 Property Auto-accessors
 
@@ -513,6 +516,28 @@ This is a mixin that is not I<use>d automatically by REST::Neo4p. For
 details and examples, see L<REST::Neo4p::Constrain> and
 L<REST::Neo4p::Constraint>.
 
+=head2 Server-side constraints (Neo4j server version 2.0.1+ only)
+
+Neo4j L<"schema" constraints"|http://docs.neo4j.org/chunked/stable/cypher-schema.html>
+based on labels can be manipulated via REST using
+L<REST::Neo4p::Schema>.
+
+=head1 USER AGENT
+
+The backend user agent can be selected by setting the package variable
+C<$REST::Neo4p::AGENT_MODULE> to one of the following
+
+ LWP::UserAgent
+ Mojo::UserAgent
+ HTTP::Thin
+
+The L<REST::Neo4p::Agent> created will be a subclass of the selected
+backend agent. It can be accessed with L<agent()>.
+
+The initial value of C<$REST::Neo4p::AGENT_MODULE> will be the value
+of the environment variable C<REST_NEO4P_AGENT_MODULE> or
+C<LWP::UserAgent> by default.
+
 =head1 CLASS METHODS
 
 =over
@@ -527,7 +552,7 @@ L<REST::Neo4p::Constraint>.
  REST::Neo4p->agent->credentials( $server, '', $user, $pass);
  REST::Neo4p->connect($server);
 
-Returns the underlying L<REST::Neo4p::Agent> (which ISA L<LWP::UserAgent>).
+Returns the underlying L<REST::Neo4p::Agent> object.
 
 =item neo4j_version()
 
@@ -621,7 +646,7 @@ These fields contain decoded JSON responses from the server following
 a commit.  C<_tx_errors> is an arrayref of statement errors during
 commit. C<_tx_results> is an arrayref of columns-data hashes as
 described at
-L<Neo4j:Transactional HTTP endpoint|http://docs.neo4j.org/chunked/2.0.0-RC1/rest-api-transactional.html>.
+L<Neo4j:Transactional HTTP endpoint|http://docs.neo4j.org/chunked/stable/rest-api-transactional.html>.
 
 These fields are cleared by C<begin_work()> and C<rollback()>.
 
@@ -631,7 +656,7 @@ These fields are cleared by C<begin_work()> and C<rollback()>.
 
 L<REST::Neo4p::Node>,L<REST::Neo4p::Relationship>,L<REST::Neo4p::Index>,
 L<REST::Neo4p::Query>, L<REST::Neo4p::Path>, L<REST::Neo4p::Batch>,
-L<REST::Neo4p::Constrain>, L<REST::Neo4p::Constraint>.
+L<REST::Neo4p::Schema>,L<REST::Neo4p::Constrain>, L<REST::Neo4p::Constraint>.
 
 =head1 AUTHOR
 

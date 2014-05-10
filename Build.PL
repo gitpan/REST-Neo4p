@@ -1,4 +1,4 @@
-#$Id: Build.PL 327 2014-01-01 18:02:08Z maj $
+#$Id: Build.PL 422 2014-05-10 23:04:17Z maj $
 use Module::Build;
 use strict;
 use warnings;
@@ -18,6 +18,10 @@ my $build =  Module::Build->new
 	'Tie::IxHash' => 0,
 	perl => 5.010
        },
+      recommends => {
+	'Mojo::UserAgent' => 0,
+	'HTTP::Thin' => 0
+       },
       configure_requires => {
 	'Module::Build' => 0
        },
@@ -28,7 +32,9 @@ my $build =  Module::Build->new
 	'List::MoreUtils' => 0
        },
       build_recommends => {
-	 'Test::Pod' => 1.0
+	 'Test::Pod' => 1.0,
+	 'Mojo::UserAgent' => 0,
+	 'HTTP::Thin' => 0
 	},
       perl => 5.010
     );

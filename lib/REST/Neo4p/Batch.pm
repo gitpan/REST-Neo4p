@@ -1,4 +1,4 @@
-#$Id: Batch.pm 354 2014-02-17 05:22:50Z maj $
+#$Id: Batch.pm 422 2014-05-10 23:04:17Z maj $
 package REST::Neo4p::Batch;
 use REST::Neo4p::Exceptions;
 use JSON::Streaming::Reader;
@@ -10,8 +10,7 @@ use warnings;
 no warnings qw(once);
 
 BEGIN {
-  $REST::Neo4p::Batch::VERSION = '0.2242';
-  $REST::Neo4p::Batch::VERSION = '0.2242';
+  $REST::Neo4p::Batch::VERSION = '0.2250';
 }
 
 our @EXPORT = qw(batch);
@@ -52,7 +51,9 @@ sub batch (&@) {
 
 sub _scan_for_errors {
   my $tmpfh = shift;
+
   $tmpfh->seek(0,0);
+#  open $tmpfh;
   my $jsonr = JSON::Streaming::Reader->for_stream($tmpfh);
   my $in_response;
   my @errors;
@@ -92,6 +93,7 @@ sub _scan_for_errors {
 sub _process_objs {
   my $tmpfh = shift;
   $tmpfh->seek(0,0);
+#  open $tmpfh;
   my $jsonr = JSON::Streaming::Reader->for_stream($tmpfh);
   my $in_response;
   PARSE : 
