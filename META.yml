@@ -43,6 +43,7 @@ provides:
     version: '0.2250'
   REST::Neo4p::Constraint::NodeProperty:
     file: lib/REST/Neo4p/Constraint/Property.pm
+    version: '0.2250'
   REST::Neo4p::Constraint::Property:
     file: lib/REST/Neo4p/Constraint/Property.pm
     version: '0.2250'
@@ -51,6 +52,7 @@ provides:
     version: '0.2250'
   REST::Neo4p::Constraint::RelationshipProperty:
     file: lib/REST/Neo4p/Constraint/Property.pm
+    version: '0.2250'
   REST::Neo4p::Constraint::RelationshipType:
     file: lib/REST/Neo4p/Constraint/RelationshipType.pm
     version: '0.2250'
