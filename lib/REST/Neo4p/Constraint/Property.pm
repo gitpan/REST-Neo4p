@@ -1,4 +1,4 @@
-#$Id: Property.pm 415 2014-05-05 03:00:37Z maj $
+#$Id: Property.pm 426 2014-05-13 03:10:16Z maj $
 package REST::Neo4p::Constraint::Property;
 use base 'REST::Neo4p::Constraint';
 use strict;

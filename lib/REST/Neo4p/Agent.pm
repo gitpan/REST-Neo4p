@@ -1,4 +1,4 @@
-#$Id: Agent.pm 421 2014-05-10 22:53:01Z maj $
+#$Id: Agent.pm 426 2014-05-13 03:10:16Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use REST::Neo4p::Exceptions;
@@ -297,7 +297,7 @@ sub DESTROY {}
 
 =head1 NAME
 
-REST::Neo4p::Agent - LWP client interacting with Neo4j
+REST::Neo4p::Agent - HTTP client interacting with Neo4j
 
 =head1 SYNOPSIS
 
