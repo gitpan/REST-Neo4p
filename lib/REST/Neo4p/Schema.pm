@@ -1,4 +1,4 @@
-#$Id: Schema.pm 421 2014-05-10 22:53:01Z maj $
+#$Id: Schema.pm 427 2014-05-13 19:47:26Z maj $
 use v5.10;
 package REST::Neo4p::Schema;
 use REST::Neo4p::Exceptions;
@@ -7,7 +7,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Schema::VERSION = '0.2250';
+  $REST::Neo4p::Schema::VERSION = '0.2251';
 }
 
 #require 'REST::Neo4p';

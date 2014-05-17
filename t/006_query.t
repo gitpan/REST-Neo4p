@@ -1,6 +1,7 @@
 #-*-perl-*-
-#$Id: 006_query.t 417 2014-05-10 01:59:37Z maj $
+#$Id: 006_query.t 428 2014-05-15 02:52:21Z maj $
 use Test::More;
+use Data::Dumper;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -10,7 +11,7 @@ no warnings qw(once);
 my @cleanup;
 use_ok('REST::Neo4p');
 
-$SIG{__DIE__} = sub { if (ref $_[0]) { $_[0]->rethrow } else { print $_[0] }};
+# $SIG{__DIE__} = sub { if (ref $_[0]) { $_[0]->rethrow } else { print $_[0] }};
 my $build;
 my ($user,$pass);
 
@@ -120,10 +121,10 @@ SKIP : {
 
 }
 
-done_testing;
 
 END {
   CLEANUP : {
-    ok ($_->remove, 'entity removed') for @cleanup;
+      ok ($_->remove,'entity removed') for reverse @cleanup;
   }
+  done_testing;
 }

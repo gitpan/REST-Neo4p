@@ -1,4 +1,4 @@
-#$Id: Build.PL 422 2014-05-10 23:04:17Z maj $
+#$Id: Build.PL 427 2014-05-13 19:47:26Z maj $
 use Module::Build;
 use strict;
 use warnings;
@@ -16,6 +16,7 @@ my $build =  Module::Build->new
 	'LWP::UserAgent' => 6.04,
 	'Exception::Class' => 1.3,
 	'Tie::IxHash' => 0,
+	'experimental' => 0,
 	perl => 5.010
        },
       recommends => {
@@ -29,6 +30,7 @@ my $build =  Module::Build->new
 	'Module::Build' => 0,
 	'Test::More' => 0,
 	'Test::Exception' => 0,
+	'Test::NoWarnings' => 0,
 	'List::MoreUtils' => 0
        },
       build_recommends => {

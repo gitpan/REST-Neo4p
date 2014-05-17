@@ -28,6 +28,7 @@ use_ok('REST::Neo4p::Agent');
 foreach my $mod (@agent_modules) {
     my $ua;
     my $mod_available = 1;
+    diag "$mod";
     eval {
 	$ua = REST::Neo4p::Agent->new(agent_module=>$mod);
     };
@@ -53,7 +54,6 @@ foreach my $mod (@agent_modules) {
 	    $not_connected = 1;
 	    diag "Test server unavailable : tests skipped";
 	}
-	
 	SKIP : {
 	    skip 'no local connection to neo4j',11 if $not_connected;
 	    is $ua->node, join('/',$TEST_SERVER, qw(db data node)), 
@@ -73,15 +73,12 @@ foreach my $mod (@agent_modules) {
 	      'server acknowledges streaming (expected default)';
 	    ok $ua->no_stream, 'set no streaming';
 	    $ua->get_node($id);
+	    isa_ok $ua->raw_response, 'HTTP::Response';
 	    unlike $ua->raw_response->header('Content-Type'), qr/stream=true/,
 	      'server acknowledges no streaming';
 	    $ua->delete_node($id);
-	    isa_ok $ua->raw_response, 'HTTP::Response';
-	    unlike $ua->raw_response->header('Content-Type'), qr/stream=true/,'server acknowledges no streaming';
-
 	}
     }
 }
-
 done_testing;
 
