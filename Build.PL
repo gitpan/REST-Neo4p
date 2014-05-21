@@ -1,4 +1,4 @@
-#$Id: Build.PL 427 2014-05-13 19:47:26Z maj $
+#$Id: Build.PL 429 2014-05-17 01:52:54Z maj $
 use Module::Build;
 use strict;
 use warnings;
@@ -17,7 +17,7 @@ my $build =  Module::Build->new
 	'Exception::Class' => 1.3,
 	'Tie::IxHash' => 0,
 	'experimental' => 0,
-	perl => 5.010
+	perl => 5.010001
        },
       recommends => {
 	'Mojo::UserAgent' => 0,

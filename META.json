@@ -4,7 +4,7 @@
       "Mark A. Jensen"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Module::Build version 0.4205",
    "license" : [
       "perl_5"
    ],
@@ -41,7 +41,7 @@
             "Tie::IxHash" : "0",
             "URI::Escape" : "3.3",
             "experimental" : "0",
-            "perl" : "5.01"
+            "perl" : "5.010001"
          }
       }
    },
