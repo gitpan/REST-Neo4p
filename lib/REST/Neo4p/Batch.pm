@@ -1,4 +1,4 @@
-#$Id: Batch.pm 427 2014-05-13 19:47:26Z maj $
+#$Id: Batch.pm 456 2014-07-01 03:15:19Z maj $
 package REST::Neo4p::Batch;
 use REST::Neo4p::Exceptions;
 use JSON::Streaming::Reader;
@@ -10,7 +10,7 @@ use warnings;
 no warnings qw(once);
 
 BEGIN {
-  $REST::Neo4p::Batch::VERSION = '0.2252';
+  $REST::Neo4p::Batch::VERSION = '0.2253';
 }
 
 our @EXPORT = qw(batch);

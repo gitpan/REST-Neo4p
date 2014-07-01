@@ -1,4 +1,4 @@
-#$Id: Query.pm 427 2014-05-13 19:47:26Z maj $
+#$Id: Query.pm 456 2014-07-01 03:15:19Z maj $
 use v5.10;
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
@@ -11,7 +11,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 BEGIN {
-  $REST::Neo4p::Query::VERSION = '0.2252';
+  $REST::Neo4p::Query::VERSION = '0.2253';
 }
 
 #my $BUFSIZE = 4096;
@@ -416,14 +416,12 @@ sub _process_row {
 
 sub finish {
   my $self = shift;
+  delete $self->{_iterator};
   delete $self->{_tempfile};
   return 1;
 }
 
-sub DESTROY {
-  my $self = shift;
-  delete $self->{_tempfile};
-}
+sub DESTROY { shift->finish }
 
 =head1 NAME
 
@@ -467,7 +465,7 @@ multiple times with different parameter values:
            'MATCH (n) WHERE n.first_name = {name} RETURN n'
          );
  foreach (@names) {
-   $q->execute($_);
+   $q->execute(name => $_);
    while ($row = $q->fetch) {
     ...process
    }

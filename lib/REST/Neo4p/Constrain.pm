@@ -1,7 +1,10 @@
-#$Id: Constrain.pm 427 2014-05-13 19:47:26Z maj $
+#$Id: Constrain.pm 456 2014-07-01 03:15:19Z maj $
 package REST::Neo4p::Constrain;
 use base 'Exporter';
 use REST::Neo4p::Constraint qw(:all);
+use REST::Neo4p::Constraint::Property;
+use REST::Neo4p::Constraint::Relationship;
+use REST::Neo4p::Constraint::RelationshipType;
 use REST::Neo4p::Exceptions;
 use strict;
 use warnings;
@@ -9,7 +12,7 @@ no warnings qw(once redefine);
 
 
 BEGIN {
-  $REST::Neo4p::Constrain::VERSION = '0.2252';
+  $REST::Neo4p::Constrain::VERSION = '0.2253';
 }
 our @EXPORT = qw(create_constraint drop_constraint constrain relax);
 our @VALIDATE = qw(validate_properties validate_relationship validate_relationship_type);

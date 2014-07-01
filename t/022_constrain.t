@@ -1,6 +1,6 @@
 #-*-perl-*-
-#$Id: 022_constrain.t 415 2014-05-05 03:00:37Z maj $#
-use Test::More qw(no_plan);
+#$Id: 022_constrain.t 437 2014-05-31 00:04:52Z maj $#
+use Test::More;
 use Test::Exception;
 use Module::Build;
 use lib '../lib';
@@ -170,4 +170,5 @@ END {
   CLEANUP : {
     ok ($_->remove,'entity removed') for reverse @cleanup;
   }
+  done_testing;
   }
