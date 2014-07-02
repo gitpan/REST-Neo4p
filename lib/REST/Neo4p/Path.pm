@@ -1,11 +1,11 @@
-#$Id: Path.pm 456 2014-07-01 03:15:19Z maj $
+#$Id: Path.pm 461 2014-07-02 02:48:16Z maj $
 package REST::Neo4p::Path;
 use REST::Neo4p::Exceptions;
 use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Path::VERSION = '0.2253';
+  $REST::Neo4p::Path::VERSION = '0.2254';
 }
 
 sub new {

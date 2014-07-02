@@ -1,4 +1,4 @@
-#$Id: Agent.pm 458 2014-07-01 03:42:52Z maj $
+#$Id: Agent.pm 461 2014-07-02 02:48:16Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use REST::Neo4p::Exceptions;
@@ -11,7 +11,7 @@ use warnings;
 our @ISA;
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2253';
+  $REST::Neo4p::Agent::VERSION = '0.2254';
 }
 
 our $AUTOLOAD;

@@ -1,4 +1,4 @@
-#$Id: Node.pm 456 2014-07-01 03:15:19Z maj $
+#$Id: Node.pm 461 2014-07-02 02:48:16Z maj $
 package REST::Neo4p::Node;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Relationship;
@@ -8,7 +8,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Node::VERSION = '0.2253';
+  $REST::Neo4p::Node::VERSION = '0.2254';
 }
 
 # creation, deletion and property manipulation are delegated

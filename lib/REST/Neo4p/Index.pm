@@ -1,4 +1,4 @@
-#$Id: Index.pm 456 2014-07-01 03:15:19Z maj $#
+#$Id: Index.pm 461 2014-07-02 02:48:16Z maj $#
 package REST::Neo4p::Index;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Exceptions;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Index::VERSION = '0.2253';
+  $REST::Neo4p::Index::VERSION = '0.2254';
 }
 
 my $unsafe = "^A-Za-z0-9\-\._\ ~";
