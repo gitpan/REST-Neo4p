@@ -1,10 +1,10 @@
-#$Id: Exceptions.pm 461 2014-07-02 02:48:16Z maj $
+#$Id: Exceptions.pm 460 2014-07-01 14:33:14Z maj $
 package REST::Neo4p::Exceptions;
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.2254';
+  $REST::Neo4p::Exceptions::VERSION = '0.3000';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',
@@ -83,6 +83,11 @@ use Exception::Class (
   'REST::Neo4p::EmptyQueryResponseException' => {
     isa => 'REST::Neo4p::LocalException',
     description => 'The server response body was empty; connection problem?'
+   },
+  'REST::Neo4p::StreamException' => {
+    isa => 'REST::Neo4p::LocalException',
+    description => 'Neo4j JSON response parsing error',
+    fields => ['message']
    },
   'REST::Neo4p::ConstraintException' => {
     isa => 'REST::Neo4p::LocalException',

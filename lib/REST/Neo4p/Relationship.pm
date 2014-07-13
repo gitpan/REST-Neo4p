@@ -1,4 +1,4 @@
-#$Id: Relationship.pm 461 2014-07-02 02:48:16Z maj $
+#$Id: Relationship.pm 460 2014-07-01 14:33:14Z maj $
 package REST::Neo4p::Relationship;
 use base 'REST::Neo4p::Entity';
 use REST::Neo4p::Exceptions;
@@ -6,7 +6,7 @@ use Carp qw(croak carp);
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Relationship::VERSION = '0.2254';
+  $REST::Neo4p::Relationship::VERSION = '0.3000';
 }
 
 sub new {

@@ -1,4 +1,4 @@
-#$Id: Entity.pm 461 2014-07-02 02:48:16Z maj $
+#$Id: Entity.pm 460 2014-07-01 14:33:14Z maj $
 use v5.10;
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
@@ -10,7 +10,7 @@ use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.2254';
+  $REST::Neo4p::Entity::VERSION = '0.3000';
 }
 
 our $ENTITY_TABLE = {};
@@ -122,6 +122,7 @@ sub new_from_batch_response {
 # remove() - delete the node and destroy the object
 sub remove {
   my $self = shift;
+  return 1 unless defined $self->_handle; # gone already
   my @url_components = @_;
   my $entity_type = ref $self;
   $entity_type =~ s/.*::(.*)/\L$1\E/;
@@ -314,6 +315,7 @@ sub _entity_by_id {
   if ($entity_type eq 'index' && !$idx_type) {
     REST::Neo4p::LocalException->throw("Index requested, but index type not provided in last arg\n");
   }
+  my $new;
   unless ($ENTITY_TABLE->{$entity_type}{$id}) {
     # not recorded as object yet
     my $agent = REST::Neo4p->agent;
@@ -348,6 +350,7 @@ sub _entity_by_id {
     else {
       # usual way to get entities...
       $rq = "get_${entity_type}";
+
       eval {
 	$decoded_resp = $agent->$rq($id);
       };
@@ -360,9 +363,10 @@ sub _entity_by_id {
 	ref $e ? $e->rethrow : die $e;
       }
     }
-    $class->new_from_json_response($decoded_resp);
+    $new = ref($decoded_resp) ? $class->new_from_json_response($decoded_resp) :
+      $class->new_from_batch_response($decoded_resp);
   }
-  return $ENTITY_TABLE->{$entity_type}{$id}{self};
+  return $ENTITY_TABLE->{$entity_type}{$id}{self} || $new;
 }
 
 sub _get_url_suffix {
@@ -431,7 +435,7 @@ use strict;
 use warnings;
 no warnings qw/once/;
 BEGIN {
-  $REST::Neo4p::Simple::VERSION = '0.2254';
+  $REST::Neo4p::Simple::VERSION = '0.3000';
 }
 
 sub new { $_[1] }

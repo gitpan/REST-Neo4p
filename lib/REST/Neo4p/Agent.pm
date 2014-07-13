@@ -1,9 +1,9 @@
-#$Id: Agent.pm 461 2014-07-02 02:48:16Z maj $
+#$Id: Agent.pm 460 2014-07-01 14:33:14Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use REST::Neo4p::Exceptions;
-use File::Temp qw(tempfile);
 use JSON;
+use File::Temp;
 use Carp qw(croak carp);
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use warnings;
 our @ISA;
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.2254';
+  $REST::Neo4p::Agent::VERSION = '0.3000';
 }
 
 our $AUTOLOAD;
@@ -127,7 +127,6 @@ sub execute_batch {
     REST::Neo4p::LocalException->throw("Agent not in batch mode; can't execute batch\n");
   }
   return unless ($self->batch_length);
-#  my ($tfh, $tfname) = tempfile;
   my $tfh = File::Temp->new;
   $self->batch_mode(0);
   my @chunk;
@@ -358,13 +357,20 @@ is a default header for requests. The server responds to requests with
 chunked content, which is handled correctly by any of the underlying
 user agents.
 
-Streaming can be stopped by calling
+L<REST::Neo4p::Query> and L<REST::Neo4p::Batch> take advantage of
+streamed responsed by retrieving and returning JSON objects
+incrementally and (with the L<Mojo::UserAgent> backend) in a
+non-blocking way. New Neo4j server versions may break the incremental
+parsing. If this happens,  L<make a
+ticket|https://rt.cpan.org/Public/Bug/Report.html?Queue=REST-Neo4p>. In
+the meantime, you should be able to keep things going (albeit more
+slowly) by turning off streaming at the agent:
 
- $agent->no_stream
+ REST::Neo4p->agent->no_stream;
 
-and started with
+Streaming responses can be requested again by issuing
 
- $agent->stream
+ REST::Neo4p->agent->stream
 
 For batch API features, see L</Batch Mode>.
 
