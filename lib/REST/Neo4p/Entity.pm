@@ -1,4 +1,4 @@
-#$Id: Entity.pm 460 2014-07-01 14:33:14Z maj $
+#$Id: Entity.pm 481 2014-07-14 15:55:05Z maj $
 use v5.10;
 package REST::Neo4p::Entity;
 use REST::Neo4p::Exceptions;
@@ -10,7 +10,7 @@ use warnings;
 
 # base class for nodes, relationships, indexes...
 BEGIN {
-  $REST::Neo4p::Entity::VERSION = '0.3000';
+  $REST::Neo4p::Entity::VERSION = '0.3001';
 }
 
 our $ENTITY_TABLE = {};
@@ -435,7 +435,7 @@ use strict;
 use warnings;
 no warnings qw/once/;
 BEGIN {
-  $REST::Neo4p::Simple::VERSION = '0.3000';
+  $REST::Neo4p::Simple::VERSION = '0.3001';
 }
 
 sub new { $_[1] }

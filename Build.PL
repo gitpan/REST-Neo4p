@@ -1,4 +1,4 @@
-#$Id: Build.PL 460 2014-07-01 14:33:14Z maj $
+#$Id: Build.PL 481 2014-07-14 15:55:05Z maj $
 use Module::Build;
 use strict;
 use warnings;
@@ -39,7 +39,7 @@ my $build =  Module::Build->new
        },
       build_recommends => {
 	 'Test::Pod' => 1.0,
-         'Test::Memory::Usage' => 0,
+#         'Test::Memory::Usage' => 0,
 	 'Mojo::UserAgent' => 0,
 	 'HTTP::Thin' => 0
 	},

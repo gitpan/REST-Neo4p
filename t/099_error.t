@@ -1,4 +1,4 @@
-#$Id: 099_error.t 415 2014-05-05 03:00:37Z maj $
+#$Id: 099_error.t 479 2014-07-13 02:30:33Z maj $
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;

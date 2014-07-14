@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 006_query.t 428 2014-05-15 02:52:21Z maj $
+#$Id: 006_query.t 479 2014-07-13 02:30:33Z maj $
 use Test::More;
 use Data::Dumper;
 use Test::Exception;
