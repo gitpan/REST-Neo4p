@@ -1,4 +1,4 @@
-#$Id: Neo4p.pm 481 2014-07-14 15:55:05Z maj $
+#$Id: Neo4p.pm 486 2014-07-15 01:32:47Z maj $
 use v5.10;
 package REST::Neo4p;
 use Carp qw(croak carp);
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::VERSION = '0.3001';
+  $REST::Neo4p::VERSION = '0.3002';
 }
 
 our $CREATE_AUTO_ACCESSORS = 0;
@@ -532,7 +532,7 @@ C<$REST::Neo4p::AGENT_MODULE> to one of the following
  HTTP::Thin
 
 The L<REST::Neo4p::Agent> created will be a subclass of the selected
-backend agent. It can be accessed with L<agent()>.
+backend agent. It can be accessed with L</agent()>.
 
 The initial value of C<$REST::Neo4p::AGENT_MODULE> will be the value
 of the environment variable C<REST_NEO4P_AGENT_MODULE> or

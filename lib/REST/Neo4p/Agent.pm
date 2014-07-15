@@ -1,4 +1,4 @@
-#$Id: Agent.pm 481 2014-07-14 15:55:05Z maj $
+#$Id: Agent.pm 486 2014-07-15 01:32:47Z maj $
 use v5.10;
 package REST::Neo4p::Agent;
 use REST::Neo4p::Exceptions;
@@ -11,7 +11,7 @@ use warnings;
 our @ISA;
 our $VERSION;
 BEGIN {
-  $REST::Neo4p::Agent::VERSION = '0.3001';
+  $REST::Neo4p::Agent::VERSION = '0.3002';
 }
 
 our $AUTOLOAD;
@@ -554,7 +554,7 @@ Set/get current agent mode.
  }
 
 Returns current queue length. Throws
-L<REST::Neo4p::Exceptions|REST::Neo4p::LocalException> if agent not in
+L<REST::Neo4p::LocalException|REST::Neo4p::Exceptions> if agent not in
 batch mode.
 
 =item execute_batch()
@@ -568,7 +568,7 @@ batch mode.
 
 Processes the queued calls and returns the decoded json response from
 server in a temporary file. Returns with undef if batch length is zero.
-Throws L<REST::Neo4p::Exceptions|REST::Neo4p::LocalException> if not in batch mode.
+Throws L<REST::Neo4p::LocalException|REST::Neo4p::Exceptions> if not in batch mode.
 
 Second form takes an integer argument; this will submit the next [integer]
 jobs and return the server response in the tempfile. The batch length is

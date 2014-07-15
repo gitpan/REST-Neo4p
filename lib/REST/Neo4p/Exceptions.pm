@@ -1,10 +1,10 @@
-#$Id: Exceptions.pm 481 2014-07-14 15:55:05Z maj $
+#$Id: Exceptions.pm 486 2014-07-15 01:32:47Z maj $
 package REST::Neo4p::Exceptions;
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Exceptions::VERSION = '0.3001';
+  $REST::Neo4p::Exceptions::VERSION = '0.3002';
 }
 use Exception::Class (
   'REST::Neo4p::Exception',

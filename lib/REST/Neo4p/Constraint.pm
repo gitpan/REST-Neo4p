@@ -1,4 +1,4 @@
-#$Id: Constraint.pm 481 2014-07-14 15:55:05Z maj $
+#$Id: Constraint.pm 486 2014-07-15 01:32:47Z maj $
 package REST::Neo4p::Constraint;
 use base 'Exporter';
 use REST::Neo4p;
@@ -31,7 +31,7 @@ my $regex_to_json = sub {
 };
 
 BEGIN {
-  $REST::Neo4p::Constraint::VERSION = '0.3001';
+  $REST::Neo4p::Constraint::VERSION = '0.3002';
 }
 
 # valid constraint types
