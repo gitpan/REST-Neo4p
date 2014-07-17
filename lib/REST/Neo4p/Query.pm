@@ -1,5 +1,5 @@
 
-#$Id: Query.pm 486 2014-07-15 01:32:47Z maj $
+#$Id: Query.pm 488 2014-07-17 01:17:06Z maj $
 use v5.10;
 package REST::Neo4p::Query;
 use REST::Neo4p::Path;
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 no warnings qw(once);
 BEGIN {
-  $REST::Neo4p::Query::VERSION = '0.3002';
+  $REST::Neo4p::Query::VERSION = '0.3003';
 }
 
 our $BUFSIZE = 50000;
