@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 098_pod.t 415 2014-05-05 03:00:37Z maj $
+#$Id$
 use Test::More;
 use Module::Build;
 eval "use Test::Pod 1.00";

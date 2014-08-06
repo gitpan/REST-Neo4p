@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 007_accessors.t 415 2014-05-05 03:00:37Z maj $
+#$Id$
 use Test::More tests => 25;
 use Test::Exception;
 use Module::Build;

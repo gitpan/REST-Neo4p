@@ -1,4 +1,4 @@
-#$Id: 041_v2_txns.t 415 2014-05-05 03:00:37Z maj $
+#$Id$
 use Test::More tests => 29;
 use Test::Exception;
 use Module::Build;

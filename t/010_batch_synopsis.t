@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 010_batch_synopsis.t 479 2014-07-13 02:30:33Z maj $
+#$Id$
 use Test::More qw(no_plan);
 use Test::Exception;
 use Module::Build;

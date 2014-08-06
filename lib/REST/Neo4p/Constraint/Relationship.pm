@@ -1,11 +1,11 @@
-#$Id: Relationship.pm 488 2014-07-17 01:17:06Z maj $
+#$Id$
 package REST::Neo4p::Constraint::Relationship;
 use base 'REST::Neo4p::Constraint';
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Constraint::Relationship::VERSION = '0.3003';
+  $REST::Neo4p::Constraint::Relationship::VERSION = '0.3004';
 }
 
 sub new {

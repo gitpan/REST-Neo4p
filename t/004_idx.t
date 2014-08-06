@@ -1,4 +1,4 @@
-#$Id: 004_idx.t 415 2014-05-05 03:00:37Z maj $
+#$Id$
 
 use Test::More tests => 68;
 use Module::Build;

@@ -1,11 +1,11 @@
-#$Id: Property.pm 488 2014-07-17 01:17:06Z maj $
+#$Id$
 package REST::Neo4p::Constraint::Property;
 use base 'REST::Neo4p::Constraint';
 use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Constraint::Property::VERSION = '0.3003';
+  $REST::Neo4p::Constraint::Property::VERSION = '0.3004';
 }
 
 sub new_from_constraint_hash {
@@ -189,7 +189,7 @@ use base 'REST::Neo4p::Constraint::Property';
 use strict;
 use warnings;
 BEGIN {
-  $REST::Neo4p::Constraint::NodeProperty::VERSION='0.3003';
+  $REST::Neo4p::Constraint::NodeProperty::VERSION='0.3004';
 }
 
 sub new {
@@ -216,7 +216,7 @@ use strict;
 use warnings;
 
 BEGIN {
-  $REST::Neo4p::Constraint::RelationshipProperty::VERSION='0.3003';
+  $REST::Neo4p::Constraint::RelationshipProperty::VERSION='0.3004';
 }
 # relationship_type is added as a pseudoproperty
 

@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 009_batch.t 479 2014-07-13 02:30:33Z maj $
+#$Id$
 use Test::More;
 use Test::Exception;
 use Module::Build;

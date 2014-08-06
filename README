@@ -1,4 +1,4 @@
-$Id: README 415 2014-05-05 03:00:37Z maj $
+$Id$
 REST::Neo4p - Perl bindings for a Neo4j database via REST
 
 Mark A. Jensen, SRA International

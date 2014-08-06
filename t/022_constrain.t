@@ -1,5 +1,5 @@
 #-*-perl-*-
-#$Id: 022_constrain.t 437 2014-05-31 00:04:52Z maj $#
+#$Id$#
 use Test::More;
 use Test::Exception;
 use Module::Build;
